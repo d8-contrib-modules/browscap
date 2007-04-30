@@ -1,0 +1,38 @@
+-- 
+-- Table structure for table `browscap`
+-- 
+
+CREATE TABLE browscap (
+  useragent varchar(255) NOT NULL default '',
+  `data` longblob NOT NULL,
+  PRIMARY KEY  (useragent)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `browscap_statistics`
+-- 
+
+CREATE TABLE browscap_statistics (
+  parent varchar(255) NOT NULL,
+  counter int(11) NOT NULL default '0',
+  is_crawler tinyint(1) NOT NULL default '0',
+  PRIMARY KEY  (parent)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `cache_browscap`
+-- 
+
+CREATE TABLE cache_browscap (
+  cid varchar(255) NOT NULL default '',
+  `data` longblob,
+  expire int(11) NOT NULL default '0',
+  created int(11) NOT NULL default '0',
+  headers text,
+  PRIMARY KEY  (cid),
+  KEY expire (expire)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;

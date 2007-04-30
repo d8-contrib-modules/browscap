@@ -1,0 +1,62 @@
+<?php
+// **EC browscap.install,v 1.1, 2006-05-10 14:13:14   
+
+
+/**
+ * Implementation of hook_install()
+ */
+
+function browscap_install() {
+  switch($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $queries = db_query("CREATE TABLE {browscap} (
+                  useragent varchar(255) NOT NULL default '',
+                  `data` longblob NOT NULL,
+                  PRIMARY KEY  (useragent)
+                  ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+      $queries &= db_query("CREATE TABLE {browscap_statistics} (
+                  parent VARCHAR(255) NOT NULL,
+                  counter INT DEFAULT '0' NOT NULL,
+                  is_crawler TINYINT(1) DEFAULT '0' NOT NULL,
+                  PRIMARY KEY (parent)
+                ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+      $queries &= db_query("CREATE TABLE cache_browscap (
+                  cid varchar(255) NOT NULL default '',
+                  `data` longblob,
+                  expire int(11) NOT NULL default '0',
+                  created int(11) NOT NULL default '0',
+                  headers text,
+                  PRIMARY KEY  (cid),
+                  KEY expire (expire)
+                  ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
+      if ($queries) {
+        drupal_set_message(t('Browscap tables installed into the database'));
+      }
+      else {
+        drupal_set_message(t('There was a problem installing the Browscap tables.'), 'error');
+      }
+      
+      break;
+    case 'pgsql':
+      // This space available...
+      break;
+  }
+}
+
+function browscap_uninstall() {
+  db_query('DROP TABLE {browscap_statistics}');
+  db_query('DROP TABLE {browscap}');
+  db_query('DROP TABLE {cache_browscap}');
+  variable_del('browscap_monitor');
+  variable_del('browscap_imported');
+  variable_del('browscap_version');
+}
+
+/**
+ * Updates existing tables to UTF-8.
+ */
+function browscap_update_1() {
+  return _system_update_utf8(array('browscap'));
+  return _system_update_utf8(array('browscap_statistics'));
+}
