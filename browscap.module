@@ -54,6 +54,15 @@ function browscap_menu($may_cache) {
       'callback arguments' => array('browscap_settings'),
       'access' => user_access('administer site configuration'),
     );
+    
+    $items[] = array(
+      'path' => 'admin/settings/browscap/refresh',
+      'title' => t('Browscap Refresh'),
+      'callback' => 'browscap_refresh',
+      'access' => user_access('administer site configuration'),
+      'type' => MENU_CALLBACK
+    );
+    
   }
   else {
     if (arg(0) == 'admin' && arg(1) == 'logs' && arg(2) == 'browscap' && arg(3) == 'useragent' && arg(4)) {
@@ -120,13 +129,21 @@ function browscap_cron() {
 function browscap_settings() {
   $form['browscap_monitor'] = array(
     '#type' => 'checkbox',
-    '#prefix' => t('<p>Browscap data current as of %fileversion</p>',
-                   array('%fileversion' => variable_get('browscap_version', 'Never fetched'))),
+    '#prefix' => t('<p>Browscap data current as of %fileversion. [<a href="!refresh">Refresh now</a>]</p>',
+                   array(
+                     '%fileversion' => variable_get('browscap_version', t('Never fetched')),
+                     '!refresh' => url('admin/settings/browscap/refresh'),
+                   )),
     '#title' => t('Monitor browsers'),
     '#default_value' => variable_get('browscap_monitor', FALSE),
     '#description' => t('Monitor all user agents visiting the site.')
   );
   return system_settings_form($form);
+}
+
+function browscap_refresh() {
+  _browscap_import(FALSE);
+  drupal_goto('admin/settings/browscap');
 }
 
 /**
@@ -260,18 +277,24 @@ function _browscap_boolean($value) {
  * If there's a new version of browscap.csv, fetch it and update the
  * database.
  */
-function _browscap_import() {
+function _browscap_import($cron = TRUE) {
   // Politely check the version for updates before fetching the file
   $versionpage = drupal_http_request('http://browsers.garykeith.com/version.asp');
   if ($versionpage->error) {
-    watchdog('browscap', "Couldn't check version: ".$versionpage->error);
+    watchdog('browscap', t("Couldn't check version: "). $versionpage->error);
+    if (!$cron) {
+      drupal_set_message(t("Couldn't check version: ") .$versionpage->error, 'error');
+    }
     return;
   }
   $browscapversion = trim($versionpage->data);
   $oldversion = variable_get('browscap_version', 'Never fetched');
   if ($browscapversion == $oldversion) {
     // No update, nothing to do here
-    watchdog('browscap', 'No new version of browscap to import');
+    watchdog('browscap', t('No new version of browscap to import'));
+    if (!$cron) {
+      drupal_set_message(t('No new version of browscap to import'));
+    }
     return;
   }
 
@@ -282,7 +305,10 @@ function _browscap_import() {
 
   $browscap = drupal_http_request('http://browsers.garykeith.com/stream.asp?PHP_BrowsCapINI');
   if ($browscap->error or !trim($browscap->data)) {
-    watchdog('browscap', "Couldn't retrieve updated browscap: ".$browscap->error);
+    watchdog('browscap', t("Couldn't retrieve updated browscap: ") . $browscap->error);
+    if (!$cron) {
+      drupal_set_message(t("Couldn't retrieve updated browscap: ") . $browscap->error);
+    }
     return;
   }
   $browscapfp = fopen($browscapfile, "w");
@@ -309,7 +335,10 @@ function _browscap_import() {
     
     cache_clear_all('*', 'cache_browscap', TRUE);
     variable_set('browscap_version', $browscapversion);
-    watchdog('browscap', "New version of browscap imported: $browscapversion");
+    watchdog('browscap', t("New version of browscap imported: "). $browscapversion);
+    if (!$cron) {
+      drupal_set_message(t("New version of browscap imported: "). $browscapversion);
+    }
   }
 }
 
