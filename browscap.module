@@ -15,69 +15,65 @@
  *
  * @return array
  */
-function browscap_menu($may_cache) {
-  $items = array();
-  $access = user_access('access administration pages');
-  
-  if ($may_cache) {
-    // LOG PAGES
-    $items[] = array('path' => 'admin/logs/browscap',
-      'title' => t('Browscap'),
-      'description' => t('Browser-specific site statistics.'),
-      'callback' => 'browscap_top_useragents',
-      'callback arguments' => array('all'),
-      'access' => $access,
-      'weight' => 5);
-    $items[] = array('path' => 'admin/logs/browscap/useragents',
-      'title' => t('All user agents'),
-      'access' => $access, 'weight' => 1,
-      'type' => MENU_DEFAULT_LOCAL_TASK);
-    $items[] = array('path' => 'admin/logs/browscap/browsers',
-      'callback' => 'browscap_top_useragents',
-      'callback arguments' => array('browsers'),
-      'title' => t('Browsers'),
-      'access' => $access,
-      'weight' => 2,
-      'type' => MENU_LOCAL_TASK);
-    $items[] = array('path' => 'admin/logs/browscap/crawlers',
-      'callback' => 'browscap_top_useragents',
-      'callback arguments' => array('crawlers'),
-      'title' => t('Crawlers'), 'access' => $access, 'weight' => 3,
-      'type' => MENU_LOCAL_TASK);
-    
-    // SETTINGS PAGE
-    $items[] = array(
-      'path' => 'admin/settings/browscap',
-      'title' => t('Browscap'),
-      'description' => t('Enable browscap site statistics.'),
-      'callback' => 'drupal_get_form',
-      'callback arguments' => array('browscap_settings'),
-      'access' => user_access('administer site configuration'),
-    );
-    
-    $items[] = array(
-      'path' => 'admin/settings/browscap/refresh',
-      'title' => t('Browscap Refresh'),
-      'callback' => 'browscap_refresh',
-      'access' => user_access('administer site configuration'),
-      'type' => MENU_CALLBACK
-    );
-    
-  }
-  else {
-    if (arg(0) == 'admin' && arg(1) == 'logs' && arg(2) == 'browscap' && arg(3) == 'useragent' && arg(4)) {
-      // INFORMATION ABOUT A USERAGENT
-      $items[] = array(
-        'path' => 'admin/logs/browscap/useragent',
-        'callback' => 'browscap_useragent_properties',
-        'title' => arg(4),
-        'access' => $access, 
-        'weight' => 5,
-        'type' => MENU_LOCAL_TASK
-      );
-    }
-  }
+function browscap_menu() {
+  // LOG PAGES
+  $items['admin/reports/browscap'] = array(
+    'title' => t('Browscap'),
+    'description' => t('Browser-specific site statistics.'),
+    'page callback' => 'browscap_top_useragents',
+    'page arguments' => array('all'),
+    'access' => array('access administration pages'),
+    'weight' => 5);
+  $items['admin/reports/browscap/useragents'] = array(
+    'title' => t('All user agents'),
+    'access arguments' => array('access administration pages'),
+    'weight' => 1,
+    'type' => MENU_DEFAULT_LOCAL_TASK
+  );
+  $items['admin/reports/browscap/browsers'] = array(
+    'title' => t('Browsers'),
+    'page callback' => 'browscap_top_useragents',
+    'page arguments' => array('browsers'),
+    'access arguments' => array('access administration pages'),
+    'weight' => 2,
+    'type' => MENU_LOCAL_TASK
+  );
+  $items['admin/reports/browscap/crawlers'] = array(
+    'title' => t('Crawlers'),
+    'page callback' => 'browscap_top_useragents',
+    'page arguments' => array('crawlers'),
+    'access arguments' => array('access administration pages'),
+    'weight' => 3,
+    'type' => MENU_LOCAL_TASK
+  );
+
+  // SETTINGS PAGE
+  $items['admin/settings/browscap'] = array(
+    'title' => t('Browscap'),
+    'description' => t('Enable browscap site statistics.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('browscap_settings'),
+    'access arguments' => array('administer site configuration'),
+  );
+
+  $items['admin/settings/browscap/refresh'] = array(
+    'title' => t('Browscap Refresh'),
+    'page callback' => 'browscap_refresh',
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK
+  );
+  $items['admin/reports/browscap/useragent/%browscap'] = array(
+    'title' => arg(4),
+    'page callback' => 'browscap_useragent_properties',
+    'access arguments' => array('access administration pages'),
+    'weight' => 5,
+    'type' => MENU_LOCAL_TASK
+  );
   return $items;
+}
+
+function browscap_load($useragent) {
+  return $useragent;
 }
 
 /**
@@ -181,7 +177,8 @@ function browscap_top_useragents($view = 'all') {
       array('data' => t('Count'), 'field' => 'counter', 'sort' => 'desc'),
       array('data' => t('Percent'), 'field' => 'percent')
     );
-  } else {
+  }
+  else {
     $result = db_query('SELECT SUM(counter) FROM {browscap_statistics} WHERE is_crawler=1');
     $total = db_result($result);
     if (!$total) $total = 1;
@@ -203,7 +200,7 @@ function browscap_top_useragents($view = 'all') {
 
   while ($useragent = db_fetch_object($result)) {
     if (db_result(db_query_range('SELECT useragent FROM {browscap} WHERE useragent = "%s"', $useragent->parent, 0, 1))) {
-      $parent = l($useragent->parent, 'admin/logs/browscap/useragent/'. urlencode($useragent->parent));
+      $parent = l($useragent->parent, 'admin/reports/browscap/useragent/'. urlencode($useragent->parent));
     }
     else {
       $parent = $useragent->parent;
@@ -211,11 +208,13 @@ function browscap_top_useragents($view = 'all') {
     if ($view == 'all') {
       if ($useragent->is_crawler) {
         $is_crawler = 'Yes';
-      } else {
+      }
+      else {
         $is_crawler = 'No';
       }
       $rows[] = array($parent, $useragent->counter, $useragent->percent, $is_crawler);
-    } else {
+    }
+    else {
       $rows[] = array($parent, $useragent->counter, $useragent->percent);
     }
   }
@@ -239,8 +238,9 @@ function browscap_get_browser($useragent = NULL) {
   $cache = cache_get($cacheid, 'cache_browscap');
   if ((!empty($cache)) and ($cache->created > time() - 60*60*24)) {
     // Found a fresh entry in the cache
-    $browserinfo = unserialize($cache->data);
-  } else {
+    $browserinfo = $cache->data;
+  }
+  else {
     // Note the 'backwards' use of LIKE - the useragent column contains
     // the wildcarded pattern to match against our full-length string
     // The ORDER BY chooses the most-specific matching pattern
@@ -250,7 +250,7 @@ function browscap_get_browser($useragent = NULL) {
     // A couple of fieldnames not in our database, provided for
     // compatibility with PHP's get_browser()
     //$browserinfo->tables = $browserinfo->htmltables;
-    cache_set($cacheid, 'cache_browscap', serialize($browserinfo));
+    cache_set($cacheid, $browserinfo, 'cache_browscap');
   }
   $info = unserialize($browserinfo->data);
   $info['useragent'] = $useragent;
@@ -280,10 +280,10 @@ function _browscap_boolean($value) {
 function _browscap_import($cron = TRUE) {
   // Politely check the version for updates before fetching the file
   $versionpage = drupal_http_request('http://browsers.garykeith.com/version.asp');
-  if ($versionpage->error) {
-    watchdog('browscap', t("Couldn't check version: "). $versionpage->error);
+  if (isset($versionpage->error)) {
+    watchdog('browscap', 'Couldn\'t check version: '. $versionpage->error);
     if (!$cron) {
-      drupal_set_message(t("Couldn't check version: ") .$versionpage->error, 'error');
+      drupal_set_message(t('Couldn\'t check version: ') . $versionpage->error, 'error');
     }
     return;
   }
@@ -291,7 +291,7 @@ function _browscap_import($cron = TRUE) {
   $oldversion = variable_get('browscap_version', 'Never fetched');
   if ($browscapversion == $oldversion) {
     // No update, nothing to do here
-    watchdog('browscap', t('No new version of browscap to import'));
+    watchdog('browscap', 'No new version of browscap to import');
     if (!$cron) {
       drupal_set_message(t('No new version of browscap to import'));
     }
@@ -304,7 +304,7 @@ function _browscap_import($cron = TRUE) {
   $browscapfile = "$path/browscap_$server.ini";
 
   $browscap = drupal_http_request('http://browsers.garykeith.com/stream.asp?PHP_BrowsCapINI');
-  if ($browscap->error or !trim($browscap->data)) {
+  if (isset($browscap->error) || empty($browscap)) {
     watchdog('browscap', t("Couldn't retrieve updated browscap: ") . $browscap->error);
     if (!$cron) {
       drupal_set_message(t("Couldn't retrieve updated browscap: ") . $browscap->error);
@@ -323,8 +323,8 @@ function _browscap_import($cron = TRUE) {
       $e = $vals;
       // some recursive magic!
       $last_parent = array();
-      while ($vals['Parent'] && $vals['Parent'] !== $last_parent) {
-        $vals = $a[$vals['Parent']];
+      while (isset($vals['Parent']) && $vals['Parent'] !== $last_parent) {
+        $vals = isset($a[$vals['Parent']]) ? $a[$vals['Parent']] : array();
         $e = array_merge($vals, $e);
         $last_parent = $vals;
       }
@@ -335,9 +335,9 @@ function _browscap_import($cron = TRUE) {
     
     cache_clear_all('*', 'cache_browscap', TRUE);
     variable_set('browscap_version', $browscapversion);
-    watchdog('browscap', t("New version of browscap imported: "). $browscapversion);
+    watchdog('browscap', 'New version of browscap imported: '. $browscapversion);
     if (!$cron) {
-      drupal_set_message(t("New version of browscap imported: "). $browscapversion);
+      drupal_set_message(t('New version of browscap imported: ') . $browscapversion);
     }
   }
 }
@@ -378,7 +378,7 @@ function browscap_useragent_properties($useragent = NULL) {
   }
   $data = unserialize($row->data);
   $headers = array(t('property'), t('value'));
-  foreach($data as $key => $val) {
+  foreach ($data as $key => $val) {
     $rows[] = array($key, $val);
   }
   $output = theme('table', $header, $rows);

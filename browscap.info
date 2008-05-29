@@ -1,3 +1,4 @@
 ; $Id$
 name = Browscap
 description = "Provides statistics on browsers and a replacement for PHPs get_browser() function."
+core = 6.x

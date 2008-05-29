@@ -1,57 +1,57 @@
 <?php
-// **EC browscap.install,v 1.1, 2006-05-10 14:13:14   
-
+// $Id$
 
 /**
- * Implementation of hook_install()
+ * Implementation of hook_install.
  */
-
 function browscap_install() {
-  switch($GLOBALS['db_type']) {
-    case 'mysql':
-    case 'mysqli':
-      $queries = db_query("CREATE TABLE {browscap} (
-                  useragent varchar(255) NOT NULL default '',
-                  `data` longblob NOT NULL,
-                  PRIMARY KEY  (useragent)
-                  ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
-      $queries &= db_query("CREATE TABLE {browscap_statistics} (
-                  parent VARCHAR(255) NOT NULL,
-                  counter INT DEFAULT '0' NOT NULL,
-                  is_crawler TINYINT(1) DEFAULT '0' NOT NULL,
-                  PRIMARY KEY (parent)
-                ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
-      $queries &= db_query("CREATE TABLE cache_browscap (
-                  cid varchar(255) NOT NULL default '',
-                  `data` longblob,
-                  expire int(11) NOT NULL default '0',
-                  created int(11) NOT NULL default '0',
-                  headers text,
-                  PRIMARY KEY  (cid),
-                  KEY expire (expire)
-                  ) TYPE=MyISAM /*!40100 DEFAULT CHARACTER SET utf8 */;");
-      if ($queries) {
-        drupal_set_message(t('Browscap tables installed into the database'));
-      }
-      else {
-        drupal_set_message(t('There was a problem installing the Browscap tables.'), 'error');
-      }
-      
-      break;
-    case 'pgsql':
-      // This space available...
-      break;
-  }
-}
+  drupal_install_schema('browscap');
+} // browscap_install
+
+/**
+ * Implementation of hook_schema.
+ */
+function browscap_schema() {
+  $schema['browscap'] = array(
+    'fields' => array(
+      'useragent' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
+      'data' => array('type' => 'blob', 'size' => 'big'),
+    ),
+    'primary key' => array('useragent'),
+  );
+  $schema['browscap_statistics'] = array(
+    'fields' => array(
+      'parent' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
+      'counter' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+      'is_crawler' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE),
+    ),
+    'primary key' => array('parent'),
+  );
+  $schema['cache_browscap'] = array(
+    'fields' => array(
+      'cid' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
+      'data' => array('type' => 'blob', 'size' => 'big'),
+      'expire' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+      'created' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+      'headers' => array('type' => 'text'),
+      'serialized' => array('type' => 'int', 'size' => 'small', 'not null' => TRUE, 'default' => 0),
+    ),
+    'primary key' => array('cid'),
+    'indexes' => array(
+      'expire' => array('expire'),
+    ),
+  );
+  return $schema;
+} // browscap_schema
 
 function browscap_uninstall() {
-  db_query('DROP TABLE {browscap_statistics}');
-  db_query('DROP TABLE {browscap}');
-  db_query('DROP TABLE {cache_browscap}');
+  drupal_uninstall_schema('browscap');
+  drupal_uninstall_schema('browscap_statistics');
+  drupal_uninstall_schema('cache_browscap');
   variable_del('browscap_monitor');
   variable_del('browscap_imported');
   variable_del('browscap_version');
-}
+} // browscap_uninstall
 
 /**
  * Updates existing tables to UTF-8.
@@ -59,4 +59,4 @@ function browscap_uninstall() {
 function browscap_update_1() {
   return _system_update_utf8(array('browscap'));
   return _system_update_utf8(array('browscap_statistics'));
-}
+} // browscap_update_1
