@@ -22,7 +22,7 @@ function browscap_menu() {
     'description' => t('Browser-specific site statistics.'),
     'page callback' => 'browscap_top_useragents',
     'page arguments' => array('all'),
-    'access' => array('access administration pages'),
+    'access arguments' => array('access administration pages'),
     'weight' => 5);
   $items['admin/reports/browscap/useragents'] = array(
     'title' => t('All user agents'),
