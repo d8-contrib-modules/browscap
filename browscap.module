@@ -63,8 +63,10 @@ function browscap_menu() {
     'type' => MENU_CALLBACK
   );
   $items['admin/reports/browscap/useragent/%browscap'] = array(
-    'title' => arg(4),
+    'title callback' => 'browscap_load',
+    'title arguments' => array(4),
     'page callback' => 'browscap_useragent_properties',
+    'page arguments' => array(4),
     'access arguments' => array('access administration pages'),
     'weight' => 5,
     'type' => MENU_LOCAL_TASK
