@@ -279,7 +279,7 @@ function _browscap_boolean($value) {
  */
 function _browscap_import($cron = TRUE) {
   // Politely check the version for updates before fetching the file
-  $versionpage = drupal_http_request('http://browsers.garykeith.com/version.asp');
+  $versionpage = drupal_http_request('http://browsers.garykeith.com/versions/version-number.asp');
   if (isset($versionpage->error)) {
     watchdog('browscap', 'Couldn\'t check version: '. $versionpage->error);
     if (!$cron) {
