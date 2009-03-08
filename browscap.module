@@ -209,10 +209,10 @@ function browscap_top_useragents($view = 'all') {
     }
     if ($view == 'all') {
       if ($useragent->is_crawler) {
-        $is_crawler = 'Yes';
+        $is_crawler = t('Yes');
       }
       else {
-        $is_crawler = 'No';
+        $is_crawler = t('No');
       }
       $rows[] = array($parent, $useragent->counter, $useragent->percent, $is_crawler);
     }
