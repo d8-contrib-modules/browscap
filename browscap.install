@@ -46,8 +46,6 @@ function browscap_schema() {
 
 function browscap_uninstall() {
   drupal_uninstall_schema('browscap');
-  drupal_uninstall_schema('browscap_statistics');
-  drupal_uninstall_schema('cache_browscap');
   variable_del('browscap_monitor');
   variable_del('browscap_imported');
   variable_del('browscap_version');
