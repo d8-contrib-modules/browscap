@@ -201,7 +201,7 @@ function browscap_top_useragents($view = 'all') {
   $result = pager_query($query, 50, 0, $query_cnt);
 
   while ($useragent = db_fetch_object($result)) {
-    if (db_result(db_query_range('SELECT useragent FROM {browscap} WHERE useragent = "%s"', $useragent->parent, 0, 1))) {
+    if (db_result(db_query_range("SELECT useragent FROM {browscap} WHERE useragent = '%s'", $useragent->parent, 0, 1))) {
       $parent = l($useragent->parent, 'admin/reports/browscap/useragent/'. urlencode($useragent->parent));
     }
     else {
@@ -332,7 +332,8 @@ function _browscap_import($cron = TRUE) {
       }
       $useragent = strtr($key, '*?', '%_');
       $e = array_change_key_case($e);
-      db_query("REPLACE INTO {browscap} (useragent, data) VALUES('%s','%s')", $useragent, serialize($e));
+      db_query("DELETE FROM {browscap} WHERE useragent = '%s'", $useragent);
+      db_query("INSERT INTO {browscap} (useragent, data) VALUES ('%s', '%s')", $useragent, serialize($e));
     }
     
     cache_clear_all('*', 'cache_browscap', TRUE);
