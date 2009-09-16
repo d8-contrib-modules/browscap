@@ -18,7 +18,12 @@ Drupal installation.
 2. Enable the browscap module in the administration tools.
 
 3. Go to http://www.example.com/cron.php to perform the initial import
-of the browscap data.
+of the browscap data or visit Administer > Site configuration > Browscap
+and click the "Refresh now" link.
+
+4. On Administer > Site configuration > Browscap you can enable logging of 
+browser types for visitors to your site. The report is visible at 
+Administer > Reports > Browscap
 
 API
 ---

@@ -193,7 +193,7 @@ function browscap_top_useragents($view = 'all') {
       array('data' => t('Percent'), 'field' => 'percent')
     );
   }
-  
+
   drupal_set_title($title);
 
   $query .= tablesort_sql($header);
@@ -228,8 +228,6 @@ function browscap_top_useragents($view = 'all') {
 
   print theme('page', $output, $title);
 }
-
-
 
 function browscap_get_browser($useragent = NULL) {
   if (!$useragent) {
@@ -316,7 +314,7 @@ function _browscap_import($cron = TRUE) {
   $browscapfp = fopen($browscapfile, "w");
   fwrite($browscapfp, $browscap->data);
   fclose($browscapfp);
-  
+
   $a = parse_ini_file($browscapfile, TRUE);
   if ($a) {
     // the first entry in the array is the version info
@@ -335,7 +333,7 @@ function _browscap_import($cron = TRUE) {
       db_query("DELETE FROM {browscap} WHERE useragent = '%s'", $useragent);
       db_query("INSERT INTO {browscap} (useragent, data) VALUES ('%s', '%s')", $useragent, serialize($e));
     }
-    
+
     cache_clear_all('*', 'cache_browscap', TRUE);
     variable_set('browscap_version', $browscapversion);
     watchdog('browscap', 'New version of browscap imported: '. $browscapversion);
