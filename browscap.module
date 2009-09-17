@@ -120,26 +120,36 @@ function browscap_cron() {
  */
 
 /**
- * Callback for settings form
- * Turn monitoring on or off
+ * Callback for settings form.
+ * Turn monitoring on or off and refresh the reference data.
  *
  * @return array
  */
 function browscap_settings() {
-  $form['browscap_monitor'] = array(
-    '#type' => 'checkbox',
-    '#prefix' => t('<p>Browscap data current as of %fileversion. [<a href="!refresh">Refresh now</a>]</p>',
+  $form['browscap_data_status'] = array(
+    '#value' => t('<p>Browscap data current as of %fileversion. [<a href="!refresh">Refresh now</a>]</p>',
                    array(
                      '%fileversion' => variable_get('browscap_version', t('Never fetched')),
                      '!refresh' => url('admin/settings/browscap/refresh'),
                    )),
+  );
+
+  $form['browscap_monitor'] = array(
+    '#type' => 'checkbox',
     '#title' => t('Monitor browsers'),
     '#default_value' => variable_get('browscap_monitor', FALSE),
-    '#description' => t('Monitor all user agents visiting the site.')
+    '#description' => t('Monitor all user agents visiting the site. View the reports in the <a href="!reports">Browscap reports</a> area.',
+                        array(
+                          '!reports' => url('admin/reports/browscap'),
+                        )),
   );
   return system_settings_form($form);
 }
 
+/**
+ * Simple page callback to manually refresh the data.
+ *
+ */
 function browscap_refresh() {
   _browscap_import(FALSE);
   drupal_goto('admin/settings/browscap');
@@ -226,7 +236,11 @@ function browscap_top_useragents($view = 'all') {
     $rows[] = array(array('data' => $pager, 'colspan' => 2));
   }
 
-  $output = theme('table', $header, $rows);
+  $output = '';
+  if (empty($rows)) {
+    $output .= t('It appears that your site has not recorded any visits. If you want to record the visitors to your site you can enable "Monitor browsers" on the <a href="!settings_uri">Browscap settings screen</a>.', array('!settings_uri' => url('admin/settings/browscap')));
+  }
+  $output .= theme('table', $header, $rows);
 
   print theme('page', $output, $title);
 }

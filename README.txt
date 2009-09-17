@@ -22,8 +22,10 @@ of the browscap data or visit Administer > Site configuration > Browscap
 and click the "Refresh now" link.
 
 4. On Administer > Site configuration > Browscap you can enable logging of 
-browser types for visitors to your site. The report is visible at 
-Administer > Reports > Browscap
+browser types for visitors to your site. 
+
+5. The report itself is visible at Administer > Reports > Browscap and 
+several other tabs in that area.
 
 API
 ---
