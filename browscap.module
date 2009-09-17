@@ -86,18 +86,19 @@ function browscap_load($useragent) {
 function browscap_exit() {
   // If monitoring is enabled, record the browser
   if (variable_get('browscap_monitor', FALSE)) {
-    $browser = browscap_get_browser();
-    $browserstring = substr(trim($browser['parent']), 0, 255);
-    if ($browserstring == '' or $browserstring == 'Default Browser') {
-      $browserstring = trim($_SERVER['HTTP_USER_AGENT']);
-    }
-    db_query("UPDATE {browscap_statistics} SET counter = counter + 1, is_crawler=%d ".
-      "WHERE parent='%s'", $browser['crawler'], $browserstring);
-    // If we affected 0 rows, this is the first time we've seen this browser
-    if (!db_affected_rows()) {
-      // We must create a new row to store counters for the new browser.
-      db_query('INSERT INTO {browscap_statistics} (parent,counter,is_crawler) '.
-        "VALUES('%s', 1, %d)", $browserstring, $browser['crawler']);
+    if ($browser = browscap_get_browser()) {
+      $browserstring = substr(trim($browser['parent']), 0, 255);
+      if ($browserstring == '' or $browserstring == 'Default Browser') {
+        $browserstring = trim($_SERVER['HTTP_USER_AGENT']);
+      }
+      db_query("UPDATE {browscap_statistics} SET counter = counter + 1, is_crawler=%d ".
+        "WHERE parent='%s'", $browser['crawler'], $browserstring);
+      // If we affected 0 rows, this is the first time we've seen this browser
+      if (!db_affected_rows()) {
+        // We must create a new row to store counters for the new browser.
+        db_query('INSERT INTO {browscap_statistics} (parent,counter,is_crawler) '.
+          "VALUES('%s', 1, %d)", $browserstring, $browser['crawler']);
+      }
     }
   }
 }
@@ -199,6 +200,7 @@ function browscap_top_useragents($view = 'all') {
   $query .= tablesort_sql($header);
 
   $result = pager_query($query, 50, 0, $query_cnt);
+  $rows = array();
 
   while ($useragent = db_fetch_object($result)) {
     if (db_result(db_query_range("SELECT useragent FROM {browscap} WHERE useragent = '%s'", $useragent->parent, 0, 1))) {
@@ -224,11 +226,19 @@ function browscap_top_useragents($view = 'all') {
     $rows[] = array(array('data' => $pager, 'colspan' => 2));
   }
 
-  $output .= theme('table', $header, $rows);
+  $output = theme('table', $header, $rows);
 
   print theme('page', $output, $title);
 }
 
+/**
+ * Provide data about the current browser or a known user agent string.
+ *
+ * @param string $useragent
+ *   Optional user agent string to test.  If empty use the value from the current request.
+ * @return array
+ *  An array of data about the user agent.
+ */
 function browscap_get_browser($useragent = NULL) {
   if (!$useragent) {
     $useragent = $_SERVER['HTTP_USER_AGENT'];
@@ -252,12 +262,13 @@ function browscap_get_browser($useragent = NULL) {
     //$browserinfo->tables = $browserinfo->htmltables;
     cache_set($cacheid, $browserinfo, 'cache_browscap');
   }
-  $info = unserialize($browserinfo->data);
-  $info['useragent'] = $useragent;
-  $info['browser_name_pattern'] = strtr($browserinfo->useragent, '%_', '*?');
-  return $info;
+  if (isset($browserinfo) && isset($browserinfo->data)) {
+    $info = unserialize($browserinfo->data);
+    $info['useragent'] = $useragent;
+    $info['browser_name_pattern'] = strtr($browserinfo->useragent, '%_', '*?');
+    return $info;
+  }
 }
-
 
 // A numeric interpretation of browscap.csv's TRUE/FALSE/default fields
 function _browscap_boolean($value) {
