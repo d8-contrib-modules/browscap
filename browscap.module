@@ -284,6 +284,17 @@ function browscap_get_browser($useragent = NULL) {
   }
 }
 
+/**
+ * Determine whether the current visitor
+ *
+ * @param string $useragent
+ *   Optional user agent string.
+ */
+function browscap_is_crawler($useragent = NULL) {
+  $browser = browscap_get_browser($useragent);
+  return (bool)$browser['crawler'];
+}
+
 // A numeric interpretation of browscap.csv's TRUE/FALSE/default fields
 function _browscap_boolean($value) {
   switch ($value) {
