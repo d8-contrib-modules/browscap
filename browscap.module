@@ -60,11 +60,10 @@ function browscap_menu() {
     'title' => t('Browscap Refresh'),
     'page callback' => 'browscap_refresh',
     'access arguments' => array('administer site configuration'),
-    'type' => MENU_CALLBACK
+    'type' => MENU_CALLBACK,
   );
-  $items['admin/reports/browscap/useragent/%browscap'] = array(
-    'title callback' => 'browscap_load',
-    'title arguments' => array(4),
+  $items['admin/reports/browscap/useragent/%browscap_useragent'] = array(
+    'title' => 'Useragent details',
     'page callback' => 'browscap_useragent_properties',
     'page arguments' => array(4),
     'access arguments' => array('access administration pages'),
@@ -72,10 +71,6 @@ function browscap_menu() {
     'type' => MENU_LOCAL_TASK
   );
   return $items;
-}
-
-function browscap_load($useragent) {
-  return $useragent;
 }
 
 /**
@@ -217,7 +212,7 @@ function browscap_top_useragents($view = 'all') {
       $parent = l($useragent->parent, 'admin/reports/browscap/useragent/'. urlencode($useragent->parent));
     }
     else {
-      $parent = $useragent->parent;
+      $parent = check_plain($useragent->parent);
     }
     if ($view == 'all') {
       if ($useragent->is_crawler) {
@@ -403,21 +398,38 @@ function browscap_unmonitor() {
   }
 }
 
-function browscap_useragent_properties($useragent = NULL) {
-  if ($useragent == NULL) {
-    drupal_not_found();
-    return;
+/**
+ * Loads details about a given useragent. Also used as a menu object loader.
+ *
+ * @param $useragent
+ *   The name of the useragent to load.
+ * @return
+ *   The useragent array, FALSE otherwise.
+ */
+function browscap_useragent_load($useragent = NULL) {
+  if (empty($useragent)) {
+    return FALSE;
   }
   $row = db_fetch_object(db_query('SELECT * FROM {browscap} WHERE useragent = "%s"', $useragent));
   if (!$row) {
-    drupal_not_found();
-    return;
+    return FALSE;
   }
-  $data = unserialize($row->data);
-  $headers = array(t('property'), t('value'));
-  foreach ($data as $key => $val) {
-    $rows[] = array($key, $val);
+  return unserialize($row->data);
+}
+
+/**
+ * Page callback to show details about known useragents.
+ *
+ * @param $useragent
+ *   The useragent object, loaded from the database.
+ * @return string an HTMl blob representing the data about this useragent.
+ */
+function browscap_useragent_properties($useragent = NULL) {
+  drupal_set_title(check_plain($useragent['browser'] .' '. $useragent['version']));
+  $headers = array(t('Property'), t('Value'));
+  foreach ($useragent as $key => $val) {
+    $rows[] = array(check_plain($key), check_plain($val));
   }
-  $output = theme('table', $header, $rows);
+  $output = theme('table', $headers, $rows);
   return $output;
 }
