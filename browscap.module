@@ -367,7 +367,7 @@ function _browscap_import($cron = TRUE) {
       $useragent = strtr($key, '*?', '%_');
       $e = array_change_key_case($e);
       db_query("DELETE FROM {browscap} WHERE useragent = '%s'", $useragent);
-      db_query("INSERT INTO {browscap} (useragent, data) VALUES ('%s', '%s')", $useragent, serialize($e));
+      db_query("INSERT INTO {browscap} (useragent, data) VALUES ('%s', %b)", $useragent, serialize($e));
     }
 
     cache_clear_all('*', 'cache_browscap', TRUE);
@@ -415,7 +415,7 @@ function browscap_useragent_load($useragent = NULL) {
   if (empty($useragent)) {
     return FALSE;
   }
-  $row = db_fetch_object(db_query('SELECT * FROM {browscap} WHERE useragent = "%s"', $useragent));
+  $row = db_fetch_object(db_query("SELECT * FROM {browscap} WHERE useragent = '%s'", $useragent));
   if (!$row) {
     return FALSE;
   }
