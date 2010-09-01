@@ -58,3 +58,15 @@ function browscap_update_1() {
   return _system_update_utf8(array('browscap'));
   return _system_update_utf8(array('browscap_statistics'));
 } // browscap_update_1
+
+/**
+ * Implementation of hook_update_N.
+ * Update from D5 to D6.
+ */
+function browscap_update_6000() {
+  $ret = array();
+  if (!db_column_exists('cache_browscap', 'serialized')) {
+    db_add_field($ret, 'cache_browscap', 'serialized', array('type' => 'int', 'size' => 'small', 'not null' => TRUE, 'default' => 0));
+  }
+  return $ret;
+}
