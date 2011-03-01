@@ -349,6 +349,13 @@ function _browscap_import($cron = TRUE) {
     }
     return;
   }
+
+  // The file as downloaded from browser.garykeith.com has semicolon (;) and
+  // single-quote (') characters in the section strings, either of which will
+  // cause parse_ini_file() to abort and return FALSE.  To fix this, simply
+  // escape them with the backslash character.
+  $browscap->data = preg_replace(array("/(?<![;\n])([;'])/",'/\A\\\\/'), array('\\\\$1',''), $browscap->data);
+
   $browscapfp = fopen($browscapfile, "w");
   fwrite($browscapfp, $browscap->data);
   fclose($browscapfp);
