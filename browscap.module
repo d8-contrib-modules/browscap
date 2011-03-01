@@ -17,20 +17,20 @@
 function browscap_menu() {
   // LOG PAGES
   $items['admin/reports/browscap'] = array(
-    'title' => t('Browscap'),
-    'description' => t('Browser-specific site statistics.'),
+    'title' => 'Browscap',
+    'description' => 'Browser-specific site statistics.',
     'page callback' => 'browscap_top_useragents',
     'page arguments' => array('all'),
     'access arguments' => array('access administration pages'),
     'weight' => 5);
   $items['admin/reports/browscap/useragents'] = array(
-    'title' => t('All user agents'),
+    'title' => 'All user agents',
     'access arguments' => array('access administration pages'),
     'weight' => 1,
     'type' => MENU_DEFAULT_LOCAL_TASK
   );
   $items['admin/reports/browscap/browsers'] = array(
-    'title' => t('Browsers'),
+    'title' => 'Browsers',
     'page callback' => 'browscap_top_useragents',
     'page arguments' => array('browsers'),
     'access arguments' => array('access administration pages'),
@@ -38,7 +38,7 @@ function browscap_menu() {
     'type' => MENU_LOCAL_TASK
   );
   $items['admin/reports/browscap/crawlers'] = array(
-    'title' => t('Crawlers'),
+    'title' => 'Crawlers',
     'page callback' => 'browscap_top_useragents',
     'page arguments' => array('crawlers'),
     'access arguments' => array('access administration pages'),
@@ -48,15 +48,15 @@ function browscap_menu() {
 
   // SETTINGS PAGE
   $items['admin/settings/browscap'] = array(
-    'title' => t('Browscap'),
-    'description' => t('Enable browscap site statistics.'),
+    'title' => 'Browscap',
+    'description' => 'Enable browscap site statistics.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('browscap_settings'),
     'access arguments' => array('administer site configuration'),
   );
 
   $items['admin/settings/browscap/refresh'] = array(
-    'title' => t('Browscap Refresh'),
+    'title' => 'Browscap Refresh',
     'page callback' => 'browscap_refresh',
     'access arguments' => array('administer site configuration'),
     'type' => MENU_CALLBACK,
