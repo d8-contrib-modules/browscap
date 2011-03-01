@@ -55,12 +55,6 @@ function browscap_menu() {
     'access arguments' => array('administer site configuration'),
   );
 
-  $items['admin/settings/browscap/refresh'] = array(
-    'title' => 'Browscap Refresh',
-    'page callback' => 'browscap_refresh',
-    'access arguments' => array('administer site configuration'),
-    'type' => MENU_CALLBACK,
-  );
   $items['admin/reports/browscap/useragent/%browscap_useragent'] = array(
     'title' => 'Useragent details',
     'page callback' => 'browscap_useragent_properties',
@@ -121,11 +115,8 @@ function browscap_cron() {
  */
 function browscap_settings() {
   $form['browscap_data_status'] = array(
-    '#value' => t('<p>Browscap data current as of %fileversion. [<a href="!refresh">Refresh now</a>]</p>',
-                   array(
-                     '%fileversion' => variable_get('browscap_version', t('Never fetched')),
-                     '!refresh' => url('admin/settings/browscap/refresh'),
-                   )),
+    '#markup' => '<p>' . t('Current browscap data version: %fileversion.',
+                   array('%fileversion' => $version ? $version : t('Never fetched'))) . '</p>',
   );
 
   $form['browscap_monitor'] = array(
@@ -137,16 +128,33 @@ function browscap_settings() {
                           '!reports' => url('admin/reports/browscap'),
                         )),
   );
+
+  $form['save'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  $form['refresh'] = array(
+    '#type' => 'submit',
+    '#value' => t('Refresh browscap data'),
+  );
   return system_settings_form($form);
 }
 
 /**
- * Simple page callback to manually refresh the data.
+ * Submit handler for settings page.
  *
  */
-function browscap_refresh() {
-  _browscap_import(FALSE);
-  drupal_goto('admin/settings/browscap');
+function browscap_settings_submit($form, &$form_state) {
+  switch ($form_state['clicked_button']['#id']) {
+    case 'edit-save':
+      variable_set('browscap_monitor', $form_state['values']['browscap_monitor']);
+      break;
+
+    case 'edit-refresh':
+      _browscap_import(FALSE);
+      break;
+  }
 }
 
 /**
