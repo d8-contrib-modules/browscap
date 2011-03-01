@@ -1,13 +1,6 @@
 <?php
 
 /**
- * Implementation of hook_install.
- */
-function browscap_install() {
-  drupal_install_schema('browscap');
-} // browscap_install
-
-/**
  * Implementation of hook_schema.
  */
 function browscap_schema() {
@@ -44,7 +37,6 @@ function browscap_schema() {
 } // browscap_schema
 
 function browscap_uninstall() {
-  drupal_uninstall_schema('browscap');
   variable_del('browscap_monitor');
   variable_del('browscap_imported');
   variable_del('browscap_version');
@@ -53,19 +45,21 @@ function browscap_uninstall() {
 /**
  * Updates existing tables to UTF-8.
  */
+/**
+ * Does not meet the hook_update_N specification.
+ * @see http://api.drupal.org/api/drupal/modules--system--system.api.php/function/hook_update_N/7
 function browscap_update_1() {
   return _system_update_utf8(array('browscap'));
   return _system_update_utf8(array('browscap_statistics'));
 } // browscap_update_1
+*/
 
 /**
  * Implementation of hook_update_N.
- * Update from D5 to D6.
+ * Update from D6 to D7.
+ * @todo Will be solved later. Set the version number for new installs for now.
  */
-function browscap_update_6000() {
+function browscap_update_7000() {
   $ret = array();
-  if (!db_column_exists('cache_browscap', 'serialized')) {
-    db_add_field($ret, 'cache_browscap', 'serialized', array('type' => 'int', 'size' => 'small', 'not null' => TRUE, 'default' => 0));
-  }
   return $ret;
 }

@@ -27,6 +27,16 @@ browser types for visitors to your site.
 5. The report itself is visible at Administer > Reports > Browscap and 
 several other tabs in that area.
 
+Upgrades
+--------
+
+Upgrading from 6.x to 7.x:
+
+* The upgrade path is untested so far.
+* To view browscap reports in the 6.x module required the
+  "access administration pages" permission.  The 7.x module requires the
+  more appropriate "access site reports" permission.
+
 API
 ---
 
