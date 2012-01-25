@@ -10,6 +10,20 @@
  */
 
 /**
+ * Implements hook_permission().
+ */
+function browscap_permission() {
+  return array(
+    'administer browscap' => array(
+      'title' => t('Administer Browscap reports'),
+    ),
+    'view browscap reports' => array(
+      'title' => t('View Browscap reports'),
+    ),
+  );
+}
+
+/**
  * Implementation of hook_menu().
  *
  * @return array
@@ -21,12 +35,12 @@ function browscap_menu() {
     'description' => 'Browser-specific site statistics.',
     'page callback' => 'browscap_top_useragents',
     'page arguments' => array('all'),
-    'access arguments' => array('access site reports'),
+    'access arguments' => array('view browscap reports'),
     'weight' => 5,
   );
   $items['admin/reports/browscap/useragents'] = array(
     'title' => 'All user agents',
-    'access arguments' => array('access site reports'),
+    'access arguments' => array('view browscap reports'),
     'weight' => 1,
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
@@ -34,7 +48,7 @@ function browscap_menu() {
     'title' => 'Browsers',
     'page callback' => 'browscap_top_useragents',
     'page arguments' => array('browsers'),
-    'access arguments' => array('access site reports'),
+    'access arguments' => array('view browscap reports'),
     'weight' => 2,
     'type' => MENU_LOCAL_TASK,
   );
@@ -42,7 +56,7 @@ function browscap_menu() {
     'title' => 'Crawlers',
     'page callback' => 'browscap_top_useragents',
     'page arguments' => array('crawlers'),
-    'access arguments' => array('access site reports'),
+    'access arguments' => array('view browscap reports'),
     'weight' => 3,
     'type' => MENU_LOCAL_TASK,
   );
@@ -53,7 +67,7 @@ function browscap_menu() {
     'description' => 'Enable browscap site statistics.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('browscap_settings'),
-    'access arguments' => array('administer site configuration'),
+    'access arguments' => array('administer browscap'),
     'weight' => 100,
     'type' => MENU_LOCAL_TASK,
   );
@@ -62,7 +76,7 @@ function browscap_menu() {
     'title' => 'Useragent details',
     'page callback' => 'browscap_useragent_properties',
     'page arguments' => array(4),
-    'access arguments' => array('access site reports'),
+    'access arguments' => array('view browscap reports'),
     'weight' => 5,
     'type' => MENU_LOCAL_TASK,
   );
