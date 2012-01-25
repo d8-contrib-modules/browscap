@@ -282,7 +282,7 @@ function browscap_get_browser($useragent = NULL) {
     // the wildcarded pattern to match against our full-length string
     // The ORDER BY chooses the most-specific matching pattern
     $browserinfo = db_query(
-      "SELECT * FROM {browscap} WHERE ':useragent' LIKE useragent ORDER BY LENGTH(useragent) DESC",
+      "SELECT * FROM {browscap} WHERE :useragent LIKE useragent ORDER BY LENGTH(useragent) DESC",
       array(':useragent' => $useragent))
       ->fetchObject();
     // A couple of fieldnames not in our database, provided for
