@@ -1,12 +1,7 @@
 <?php
-
 /**
  * @file
- * Replacement for PHP's get_browser() function
- */
-
-/**
- * ******************** Drupal Hooks ************************
+ * Replacement for PHP's get_browser() function.
  */
 
 /**
@@ -24,12 +19,9 @@ function browscap_permission() {
 }
 
 /**
- * Implementation of hook_menu().
- *
- * @return array
+ * Implements hook_menu().
  */
 function browscap_menu() {
-  // LOG PAGES
   $items['admin/reports/browscap'] = array(
     'title' => 'Browscap',
     'description' => 'Browser-specific site statistics.',
@@ -60,8 +52,6 @@ function browscap_menu() {
     'weight' => 3,
     'type' => MENU_LOCAL_TASK,
   );
-
-  // SETTINGS PAGE
   $items['admin/reports/browscap/settings'] = array(
     'title' => 'Settings',
     'description' => 'Enable browscap site statistics.',
@@ -71,7 +61,6 @@ function browscap_menu() {
     'weight' => 100,
     'type' => MENU_LOCAL_TASK,
   );
-
   $items['admin/reports/browscap/useragent/%browscap_useragent'] = array(
     'title' => 'Useragent details',
     'page callback' => 'browscap_useragent_properties',
@@ -84,7 +73,7 @@ function browscap_menu() {
 }
 
 /**
- * Implementation of hook_exit().
+ * Implements hook_exit().
  *
  * Keep tabs on browsers that visit
  */
@@ -114,7 +103,7 @@ function browscap_exit() {
 }
 
 /**
- * Implementation of hook_cron().
+ * Implements hook_cron().
  */
 function browscap_cron() {
   // Has it been a week since the last (attempt to) import?
@@ -126,10 +115,6 @@ function browscap_cron() {
 }
 
 /**
- * ******************** Menu Callbacks ************************
- */
-
-/**
  * Callback for settings form.
  * Turn monitoring on or off and refresh the reference data.
  *
@@ -138,25 +123,18 @@ function browscap_cron() {
 function browscap_settings() {
   $version = variable_get('browscap_version', 0);
   $form['browscap_data_status'] = array(
-    '#markup' => '<p>' . t('Current browscap data version: %fileversion.',
-                   array('%fileversion' => $version ? $version : t('Never fetched'))) . '</p>',
+    '#markup' => '<p>' . t('Current browscap data version: %fileversion.', array('%fileversion' => $version ? $version : t('Never fetched'))) . '</p>',
   );
-
   $form['browscap_monitor'] = array(
     '#type' => 'checkbox',
     '#title' => t('Monitor browsers'),
     '#default_value' => variable_get('browscap_monitor', FALSE),
-    '#description' => t('Monitor all user agents visiting the site. View the reports in the <a href="!reports">Browscap reports</a> area.',
-                        array(
-                          '!reports' => url('admin/reports/browscap'),
-                        )),
+    '#description' => t('Monitor all user agents visiting the site. View the reports in the <a href="!reports">Browscap reports</a> area.', array('!reports' => url('admin/reports/browscap'))),
   );
-
   $form['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
   );
-
   $form['refresh'] = array(
     '#type' => 'submit',
     '#value' => t('Refresh browscap data'),
@@ -166,14 +144,12 @@ function browscap_settings() {
 
 /**
  * Submit handler for settings page.
- *
  */
 function browscap_settings_submit($form, &$form_state) {
   switch ($form_state['clicked_button']['#id']) {
     case 'edit-save':
       variable_set('browscap_monitor', $form_state['values']['browscap_monitor']);
       break;
-
     case 'edit-refresh':
       _browscap_import(FALSE);
       break;
@@ -381,7 +357,7 @@ function _browscap_import($cron = TRUE) {
   // single-quote (') characters in the section strings, either of which will
   // cause parse_ini_file() to abort and return FALSE.  To fix this, simply
   // escape them with the backslash character.
-  $browscap->data = preg_replace(array("/(?<![;\n])([;'])/",'/\A\\\\/'), array('\\\\$1',''), $browscap->data);
+  $browscap->data = preg_replace(array("/(?<![;\n])([;'])/", '/\A\\\\/'), array('\\\\$1', ''), $browscap->data);
 
   $browscapfp = fopen($browscapfile, "w");
   fwrite($browscapfp, $browscap->data);
@@ -426,7 +402,7 @@ function _browscap_import($cron = TRUE) {
     }
   }
 }
- 
+
 /*
  * Undo a recorded browser visit by request
  *
@@ -446,8 +422,7 @@ function browscap_unmonitor() {
     if ($browserstring == '' or $browserstring == 'Default Browser') {
       $browserstring = trim($_SERVER['HTTP_USER_AGENT']);
     }
-    db_query("UPDATE {browscap_statistics} SET counter = counter - 1, is_crawler=%d ".
-      "WHERE parent='%s'", $browser->crawler, $browserstring);
+    db_query("UPDATE {browscap_statistics} SET counter = counter - 1, is_crawler=%d " . "WHERE parent='%s'", $browser->crawler, $browserstring);
   }
 }
 
