@@ -82,7 +82,7 @@ function browscap_exit() {
         ? 'Default Browser'
         : substr(trim($browser['parent']), 0, 255);
       if ($browserstring == 'Default Browser') {
-        $browserstring = trim($_SERVER['HTTP_USER_AGENT']);
+        $browserstring = substr(trim($_SERVER['HTTP_USER_AGENT']), 0, 255);
       }
       if (empty($browser['crawler'])) {
         $browser['crawler'] = 0;
