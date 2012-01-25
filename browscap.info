@@ -1,7 +1,4 @@
 name = Browscap
-description = "Provides statistics on browsers and a replacement for PHPs get_browser() function."
+description = Provides a replacement for PHPs get_browser() function and collects visitor browser statistics.
 core = 7.x
-files[] = browscap.module
-files[] = browscap.install
-files[] = includes/admin.inc
 configure = admin/reports/browscap/settings
