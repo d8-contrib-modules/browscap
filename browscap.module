@@ -350,7 +350,7 @@ function _browscap_import($cron = TRUE) {
 
   // Fetch the new version, and dump it in the temp directory
   $server = $_SERVER['SERVER_NAME'];
-  $path = variable_get('file_directory_temp', '/tmp');
+  $path = variable_get('file_temporary_path', '/tmp');
   $browscapfile = "$path/browscap_$server.ini";
 
   // @todo This probably ought to be in a settings variable.
