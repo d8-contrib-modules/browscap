@@ -175,20 +175,6 @@ function browscap_is_crawler($useragent = NULL) {
   return (bool)$browser['crawler'];
 }
 
-// A numeric interpretation of browscap.csv's TRUE/FALSE/default fields
-function _browscap_boolean($value) {
-  switch ($value) {
-    case 'TRUE':
-    case 'true':
-      return 1;
-    case 'FALSE':
-    case 'false':
-    case 'default':
-    default:
-      return 0;
-  }
-}
-
 /**
  * If there's a new version of browscap.csv, fetch it and update the
  * database.
@@ -276,29 +262,6 @@ function _browscap_import($cron = TRUE) {
     if (!$cron) {
       drupal_set_message(t('New version of browscap imported: %version', array('%version' => $browscapversion)));
     }
-  }
-}
-
-/*
- * Undo a recorded browser visit by request
- *
- * This function serves the statistics_filter module, enabling it
- * to ignore visits from specified roles.
- */
-function browscap_unmonitor() {
-  // No point if statistics aren't enabled
-  if (!module_exists('statistics')) {
-    return;
-  }
-
-  // If monitoring is enabled, unrecord the browser
-  if (variable_get('browscap_monitor', FALSE)) {
-    $browser = browscap_get_browser();
-    $browserstring = trim($browser->parent);
-    if ($browserstring == '' or $browserstring == 'Default Browser') {
-      $browserstring = trim($_SERVER['HTTP_USER_AGENT']);
-    }
-    db_query("UPDATE {browscap_statistics} SET counter = counter - 1, is_crawler=%d " . "WHERE parent='%s'", $browser->crawler, $browserstring);
   }
 }
 
