@@ -99,8 +99,9 @@ function browscap_install() {
  * Implements hook_uninstall().
  */
 function browscap_uninstall() {
-  variable_del('browscap_monitor');
   variable_del('browscap_imported');
+  variable_del('browscap_monitor');
+  variable_del('browscap_update_interval');
   variable_del('browscap_version');
 }
 
