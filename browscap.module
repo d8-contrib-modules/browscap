@@ -133,7 +133,7 @@ function browscap_cron() {
  *  An array of data about the user agent.
  */
 function browscap_get_browser($useragent = NULL) {
-  if (!$useragent) {
+  if (!$useragent && isset($_SERVER['HTTP_USER_AGENT'])) {
     $useragent = $_SERVER['HTTP_USER_AGENT'];
   }
   // Cache the results
