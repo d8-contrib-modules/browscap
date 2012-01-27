@@ -68,7 +68,7 @@ function browscap_top_useragents($view = 'all') {
       ->fetchField();
 
     if ($exists) {
-      $parent = l($useragent->parent, 'admin/reports/browscap/useragent/' . urlencode($useragent->parent));
+      $parent = l($useragent->parent, 'admin/reports/browscap/useragent/' . $useragent->parent);
     }
     else {
       $parent = check_plain($useragent->parent);
