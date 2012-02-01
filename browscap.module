@@ -22,6 +22,14 @@ function browscap_permission() {
  * Implements hook_menu().
  */
 function browscap_menu() {
+  $items['admin/config/system/browscap'] = array(
+    'title' => 'Browscap',
+    'description' => 'Configure user agent monitoring and browscap information settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('browscap_settings_form'),
+    'access arguments' => array('administer browscap'),
+    'file' => 'browscap.admin.inc',
+  );
   $items['admin/reports/browscap'] = array(
     'title' => 'Browscap',
     'description' => 'Browser-specific site statistics.',
@@ -54,16 +62,6 @@ function browscap_menu() {
     'file' => 'browscap.reports.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 3,
-  );
-  $items['admin/reports/browscap/settings'] = array(
-    'title' => 'Settings',
-    'description' => 'Enable browscap site statistics.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('browscap_settings_form'),
-    'access arguments' => array('administer browscap'),
-    'file' => 'browscap.admin.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 100,
   );
   $items['admin/reports/browscap/useragent/%browscap_useragent'] = array(
     'title' => 'Useragent details',

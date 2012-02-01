@@ -87,7 +87,7 @@ function browscap_top_useragents($view = 'all') {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
-    '#empty' => t('It appears that your site has not recorded any visits. If you want to record the visitors to your site you can enable "Monitor browsers" on the <a href="!settings_uri">Browscap settings screen</a>.', array('!settings_uri' => url('admin/reports/browscap/settings'))),
+    '#empty' => t('It appears that your site has not recorded any visits. If you want to record the visitors to your site you can enable "Monitor browsers" on the <a href="!settings_uri">Browscap settings screen</a>.', array('!settings_uri' => url('admin/config/system/browscap'))),
   );
   $build['browscap_statistics_pager'] = array(
     '#theme' => 'pager',
