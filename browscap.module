@@ -80,31 +80,43 @@ function browscap_menu() {
 
 /**
  * Implements hook_exit().
- *
- * Keep tabs on browsers that visit
  */
 function browscap_exit() {
-  // If monitoring is enabled, record the browser
-  if (variable_get('browscap_monitor', FALSE)) {
-    if ($browser = browscap_get_browser()) {
-      $browserstring = empty($browser['parent'])
-        ? 'Default Browser'
-        : substr(trim($browser['parent']), 0, 255);
-      if ($browserstring == 'Default Browser') {
-        $browserstring = substr(trim($_SERVER['HTTP_USER_AGENT']), 0, 255);
-      }
-      if (empty($browser['crawler'])) {
-        $browser['crawler'] = 0;
-      }
-      db_merge('browscap_statistics')
-        ->key(array('parent' => $browserstring))
-        ->fields(array(
-          'counter' => 1,
-          'is_crawler' => $browser['crawler'] ? 1 : 0,
-        ))
-        ->expression('counter', 'counter + 1')
-        ->execute();
+  // Check the status of user agent monitoring
+  $monitoring = variable_get('browscap_monitor', FALSE);
+
+  // Record the current user agent if monitoring is enabled
+  if ($monitoring == TRUE) {
+    // Get browscap data about the current user agent
+    $user_agent = browscap_get_browser();
+
+    // Identify the user agent using browscap data
+    // Otherwise, use the USER_AGENT header from the current request
+    if (!empty($user_agent['parent'])) {
+      $user_agent_string = substr(trim($user_agent['parent']), 0, 255);
     }
+    else {
+      $user_agent_string = substr(trim($_SERVER['HTTP_USER_AGENT']), 0, 255);
+    }
+
+    // Determine if the user agent is a crawler using browscap data
+    // Otherwise, assume that the user agent isn't a crawler
+    if (!empty($user_agent['crawler'])) {
+      $user_agent_crawler = $user_agent['crawler'];
+    }
+    else {
+      $user_agent_crawler = 0;
+    }
+
+    // Record the user agent in the database
+    db_merge('browscap_statistics')
+      ->key(array('parent' => $user_agent_string))
+      ->fields(array(
+        'counter' => 1,
+        'is_crawler' => $user_agent_crawler,
+      ))
+      ->expression('counter', 'counter + 1')
+      ->execute();
   }
 }
 
