@@ -115,6 +115,9 @@ function browscap_cron() {
   // Convert the update interval from days to seconds
   $update_interval = $update_interval * 7 * 24 * 60 * 60;
 
+  // Find out when the last update occurred
+  $last_imported = variable_get('browscap_imported', REQUEST_TIME);
+
   // Has it been long enough since the last update was attempted?
   if (($last_imported + $update_interval) < REQUEST_TIME) {
     _browscap_import();
