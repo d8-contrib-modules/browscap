@@ -181,17 +181,6 @@ function browscap_get_browser($useragent = NULL) {
 }
 
 /**
- * Determine whether the current visitor is a bot.
- *
- * @param string $useragent
- *   Optional user agent string.
- */
-function browscap_is_crawler($useragent = NULL) {
-  $browser = browscap_get_browser($useragent);
-  return (bool)$browser['crawler'];
-}
-
-/**
  * Loads details about a given useragent. Also used as a menu object loader.
  *
  * @param $useragent
