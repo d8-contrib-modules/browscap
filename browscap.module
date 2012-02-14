@@ -66,14 +66,12 @@ function browscap_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 3,
   );
-  $items['admin/reports/browscap/useragent/%browscap_useragent'] = array(
+  $items['admin/reports/browscap/useragent/%'] = array(
     'title' => 'Useragent details',
     'page callback' => 'browscap_useragent_properties',
     'page arguments' => array(4),
     'access arguments' => array('view browscap reports'),
     'file' => 'browscap.user_agent.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 5,
   );
   return $items;
 }
@@ -178,27 +176,4 @@ function browscap_get_browser($useragent = NULL) {
     $info['browser_name_pattern'] = strtr($browserinfo->useragent, '%_', '*?');
     return $info;
   }
-}
-
-/**
- * Loads details about a given useragent. Also used as a menu object loader.
- *
- * @param $useragent
- *   The name of the useragent to load.
- * @return
- *   The useragent array, FALSE otherwise.
- */
-function browscap_useragent_load($useragent = NULL) {
-  if (empty($useragent)) {
-    return FALSE;
-  }
-  $row = db_select('browscap', 'b')
-    ->fields('b')
-    ->condition('useragent', $useragent)
-    ->execute()
-    ->fetchObject();
-  if (!$row) {
-    return FALSE;
-  }
-  return unserialize($row->data);
 }
