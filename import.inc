@@ -78,7 +78,7 @@ function _browscap_import($cron = TRUE) {
   else {
     // Create a path and filename
     $server = $_SERVER['SERVER_NAME'];
-    $path = variable_get('file_directory_temp', '/tmp');
+    $path = variable_get('file_temporary_path', '/tmp');
     $file = "$path/browscap_$server.ini";
 
     // Write the browscap data to a file
