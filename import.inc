@@ -5,91 +5,143 @@
  */
 
 /**
- * If there's a new version of browscap.csv, fetch it and update the
- * database.
+ * Helper function to update the browscap data.
+ *
+ * @param boolean $cron
+ *   Optional import environment. If false, display status messages to the user in addition to logging information with the watchdog.
  */
 function _browscap_import($cron = TRUE) {
-  // Politely check the version for updates before fetching the file
-  $versionpage = drupal_http_request('http://browsers.garykeith.com/versions/version-number.asp');
-  if (isset($versionpage->error)) {
-    watchdog('browscap', 'Couldn\'t check version: %error', array('%error' => $versionpage->error), WATCHDOG_ERROR);
-    if (!$cron) {
-      drupal_set_message(t('Couldn\'t check version: %error', array('%error' => $versionpage->error)), 'error');
+  // Check the local browscap version number
+  $local_version = variable_get('browscap_version', 0);
+
+  // Retrieve the current browscap version number
+  $current_version = drupal_http_request('http://browsers.garykeith.com/versions/version-number.asp');
+
+  // Log an error if the browscap version number could not be checked
+  if (isset($current_version->error)) {
+    // Log a message with the watchdog
+    watchdog('browscap', "Couldn't check version: %error", array('%error' => $current_version->error), WATCHDOG_ERROR);
+
+    // Display a message to the user if the update process was triggered manually
+    if ($cron == FALSE) {
+      drupal_set_message(t("Couldn't check version: %error", array('%error' => $current_version->error)), 'error');
     }
+
     return;
   }
-  $browscapversion = trim($versionpage->data);
-  $oldversion = variable_get('browscap_version', 0);
-  if ($browscapversion == $oldversion) {
-    // No update, nothing to do here
+
+  // Sanitize the returned version number
+  $current_version = check_plain(trim($current_version->data));
+
+  // Compare the current and local version numbers to determine if the browscap
+  // data requires updating
+  if ($current_version == $local_version) {
+    // Log a message with the watchdog
     watchdog('browscap', 'No new version of browscap to import');
-    if (!$cron) {
+
+    // Display a message to the user if the update process was triggered manually
+    if ($cron == FALSE) {
       drupal_set_message(t('No new version of browscap to import'));
     }
+
     return;
   }
 
-  // Fetch the new version, and dump it in the temp directory
-  $server = $_SERVER['SERVER_NAME'];
-  $path = variable_get('file_temporary_path', '/tmp');
-  $browscapfile = "$path/browscap_$server.ini";
+  // Fetch the latest browscap data
+  $browscap_data = drupal_http_request('http://browsers.garykeith.com/stream.asp?PHP_BrowsCapINI');
 
-  // @todo This probably ought to be in a settings variable.
-  $browscap = drupal_http_request('http://browsers.garykeith.com/stream.asp?PHP_BrowsCapINI');
-  if (isset($browscap->error) || empty($browscap)) {
-    watchdog('browscap', "Couldn't retrieve updated browscap: %error", array('%error' => $browscap->error), WATCHDOG_ERROR);
-    if (!$cron) {
-      drupal_set_message(t("Couldn't retrieve updated browscap: %error", array('%error' => $browscap->error)), 'error');
+  // Log an error if the browscap data could not be retrieved
+  if (isset($browscap_data->error) || empty($browscap_data)) {
+    // Log a message with the watchdog
+    watchdog('browscap', "Couldn't retrieve updated browscap: %error", array('%error' => $browscap_data->error), WATCHDOG_ERROR);
+
+    // Display a message to the user if the update process was triggered manually
+    if ($cron == FALSE) {
+      drupal_set_message(t("Couldn't retrieve updated browscap: %error", array('%error' => $browscap_data->error)), 'error');
     }
+
     return;
   }
 
-  // The file as downloaded from browser.garykeith.com has semicolon (;) and
-  // single-quote (') characters in the section strings, either of which will
-  // cause parse_ini_file() to abort and return FALSE.  To fix this, simply
-  // escape them with the backslash character.
-  $browscap->data = preg_replace(array("/(?<![;\n])([;'])/", '/\A\\\\/'), array('\\\\$1', ''), $browscap->data);
-
-  $browscapfp = fopen($browscapfile, "w");
-  fwrite($browscapfp, $browscap->data);
-  fclose($browscapfp);
-
+  // Parse the returned browscap data
+  // The parse_ini_string function is preferred but only available in PHP 5.3.0
   if (version_compare(PHP_VERSION, '5.3.0', '>=')) {
-    $a = parse_ini_file($browscapfile, TRUE, INI_SCANNER_RAW);
+    // Retrieve the browscap data
+    $browscap_data = $browscap_data->data;
+
+    // Replace 'true' and 'false' with '1' and '0'
+    $browscap_data = strtr($browscap_data, array("=true\r" => "=1\r", "=false\r" => "=0\r"));
+
+    // Parse the browscap data as a string
+    $browscap_data = parse_ini_string($browscap_data, TRUE, INI_SCANNER_RAW);
   }
   else {
-    $a = parse_ini_file($browscapfile, TRUE);
+    // Create a path and filename
+    $server = $_SERVER['SERVER_NAME'];
+    $path = variable_get('file_directory_temp', '/tmp');
+    $file = "$path/browscap_$server.ini";
+
+    // Write the browscap data to a file
+    $browscap_file = fopen($file, "w");
+    fwrite($browscap_file, $browscap_data->data);
+    fclose($browscap_file);
+
+    // Parse the browscap data as a file
+    $browscap_data = parse_ini_file($file, TRUE);
   }
-  if ($a) {
-    // the first entry in the array is the version info
-    $version = array_shift($a);
-    foreach ($a as $key => $vals) {
-      $e = $vals;
-      // some recursive magic!
+
+  if ($browscap_data) {
+    // Find the version information
+    // The version information is the first entry in the array
+    $version = array_shift($browscap_data);
+
+    // Store the data available for each user agent
+    foreach ($browscap_data as $key => $values) {
+      // Store the current value
+      $e = $values;
+
+      // Create an array to hold the last parent
       $last_parent = array();
-      while (isset($vals['Parent']) && $vals['Parent'] !== $last_parent) {
-        $vals = isset($a[$vals['Parent']]) ? $a[$vals['Parent']] : array();
-        $e = array_merge($vals, $e);
-        $last_parent = $vals;
+
+      // Recurse through the available user agent information
+      while (isset($values['Parent']) && $values['Parent'] !== $last_parent) {
+        $values = isset($browscap_data[$values['Parent']]) ? $browscap_data[$values['Parent']] : array();
+        $e = array_merge($values, $e);
+        $last_parent = $values;
       }
-      $useragent = strtr($key, '*?', '%_');
+
+      // Replace '*?' with '%_'
+      $user_agent = strtr($key, '*?', '%_');
+
+      // Change all array keys to lowercase
       $e = array_change_key_case($e);
+
+      // Delete all data about the current user agent from the database
       db_delete('browscap')
-        ->condition('useragent', $useragent)
+        ->condition('useragent', $user_agent)
         ->execute();
+
+      // Insert all data about the current user agent into the database
       db_insert('browscap')
         ->fields(array(
-         'useragent' => $useragent,
+         'useragent' => $user_agent,
          'data' => serialize($e)
         ))
         ->execute();
     }
 
+    // Clear the browscap data cache
     cache_clear_all('*', 'cache_browscap', TRUE);
-    variable_set('browscap_version', $browscapversion);
-    watchdog('browscap', 'New version of browscap imported: %version', array('%version' => $browscapversion));
-    if (!$cron) {
-      drupal_set_message(t('New version of browscap imported: %version', array('%version' => $browscapversion)));
+
+    // Update the browscap version
+    variable_set('browscap_version', $current_version);
+
+    // Log a message with the watchdog
+    watchdog('browscap', 'New version of browscap imported: %version', array('%version' => $current_version));
+
+    // Display a message to the user if the update process was triggered manually
+    if ($cron == FALSE) {
+      drupal_set_message(t('New version of browscap imported: %version', array('%version' => $current_version)));
     }
   }
 }
