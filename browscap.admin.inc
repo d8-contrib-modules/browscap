@@ -13,7 +13,7 @@ function browscap_settings_form($form, &$form_state) {
 
   // If the version number is 0 then browscap data has never been fetched
   if ($version == 0) {
-    $version = t('Never fetched')
+    $version = t('Never fetched');
   }
 
   $form['browscap_data_status'] = array(
