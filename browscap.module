@@ -40,7 +40,6 @@ function browscap_menu() {
     'page arguments' => array('all'),
     'access arguments' => array('view browscap reports'),
     'file' => 'browscap.reports.inc',
-    'weight' => 5,
   );
   $items['admin/reports/browscap/useragents'] = array(
     'title' => 'All',
@@ -73,6 +72,7 @@ function browscap_menu() {
     'access arguments' => array('view browscap reports'),
     'file' => 'browscap.user_agent.inc',
   );
+
   return $items;
 }
 
@@ -122,18 +122,22 @@ function browscap_exit() {
  * Implements hook_cron().
  */
 function browscap_cron() {
-  // How often should a check for updates occur (in days)?
+  // Check the current update interval
   $update_interval = variable_get('browscap_update_interval', 7);
 
   // Convert the update interval from days to seconds
   $update_interval = $update_interval * 7 * 24 * 60 * 60;
 
-  // Find out when the last update occurred
+  // Check when the last update occurred
   $last_imported = variable_get('browscap_imported', REQUEST_TIME);
 
-  // Has it been long enough since the last update was attempted?
+  // Update the browscap data if the amount of time specified by the update
+  // interval has passed
   if (($last_imported + $update_interval) < REQUEST_TIME) {
+    // Update the browscap information
     _browscap_import();
+
+    // Record when the browscap information was updated
     variable_set('browscap_imported', REQUEST_TIME);
   }
 }

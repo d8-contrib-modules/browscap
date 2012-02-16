@@ -8,9 +8,16 @@
  * Implements hook_form().
  */
 function browscap_settings_form($form, &$form_state) {
+  // Check the local browscap data version number
   $version = variable_get('browscap_version', 0);
+
+  // If the version number is 0 then browscap data has never been fetched
+  if ($version == 0) {
+    $version = t('Never fetched')
+  }
+
   $form['browscap_data_status'] = array(
-    '#markup' => '<p>' . t('Current browscap data version: %fileversion.', array('%fileversion' => $version ? $version : t('Never fetched'))) . '</p>',
+    '#markup' => '<p>' . t('Current browscap data version: %fileversion.', array('%fileversion' => $version)) . '</p>',
   );
   $form['browscap_update_interval'] = array(
     '#type' => 'textfield',
@@ -33,6 +40,7 @@ function browscap_settings_form($form, &$form_state) {
     '#submit' => array('browscap_refresh_submit'),
     '#weight' => 10,
   );
+
   return system_settings_form($form);
 }
 
@@ -40,6 +48,7 @@ function browscap_settings_form($form, &$form_state) {
  * Validate the settings form.
  */
 function browscap_settings_form_validate($form, &$form_state) {
+  // Check the update interval
   $update_interval = $form_state['values']['browscap_update_interval'];
 
   // Ensure that the update interval is a number
@@ -57,6 +66,9 @@ function browscap_settings_form_validate($form, &$form_state) {
  * Submit handler for the refresh browscap button.
  */
 function browscap_refresh_submit($form, &$form_state) {
+  // Update the browscap information
   _browscap_import(FALSE);
+
+  // Record when the browscap information was updated
   variable_set('browscap_imported', REQUEST_TIME);
 }

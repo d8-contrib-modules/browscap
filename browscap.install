@@ -110,5 +110,6 @@ function browscap_uninstall() {
  */
 function browscap_update_7000() {
   $return = array();
+
   return $return;
 }

@@ -11,10 +11,10 @@
  *   Optional import environment. If false, display status messages to the user in addition to logging information with the watchdog.
  */
 function _browscap_import($cron = TRUE) {
-  // Check the local browscap version number
+  // Check the local browscap data version number
   $local_version = variable_get('browscap_version', 0);
 
-  // Retrieve the current browscap version number
+  // Retrieve the current browscap data version number
   $current_version = drupal_http_request('http://browsers.garykeith.com/versions/version-number.asp');
 
   // Log an error if the browscap version number could not be checked
