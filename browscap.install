@@ -125,10 +125,6 @@ function browscap_update_7001() {
   if ($browscap_update_interval == 0) {
     variable_set('browscap_enable_automatic_updates', FALSE);
   }
-  else {
-    $browscap_update_interval = $browscap_update_interval * 7 * 24 * 60 * 60;
-    variable_set('browscap_automatic_updates_timer', $browscap_update_interval);
-  }
 
   variable_del('browscap_update_interval');
 
