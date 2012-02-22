@@ -80,11 +80,8 @@ function browscap_menu() {
  * Implements hook_exit().
  */
 function browscap_exit() {
-  // Check the status of user agent monitoring
-  $monitoring = variable_get('browscap_monitor', FALSE);
-
   // Record the current user agent if monitoring is enabled
-  if ($monitoring == TRUE) {
+  if (variable_get('browscap_enable_user_agent_log', FALSE) == TRUE) {
     // Get browscap data about the current user agent
     $user_agent = browscap_get_browser();
 
@@ -122,23 +119,22 @@ function browscap_exit() {
  * Implements hook_cron().
  */
 function browscap_cron() {
-  // Check the current update interval
-  $update_interval = variable_get('browscap_update_interval', 7);
+  if (variable_get('browscap_enable_automatic_updates', TRUE) == TRUE) {
+    // Check the current update timer
+    $automatic_update_timer = variable_get('browscap_automatic_updates_timer', 604800);
 
-  // Convert the update interval from days to seconds
-  $update_interval = $update_interval * 7 * 24 * 60 * 60;
+    // Check when the last update occurred
+    $last_imported = variable_get('browscap_imported', REQUEST_TIME);
 
-  // Check when the last update occurred
-  $last_imported = variable_get('browscap_imported', REQUEST_TIME);
+    // Update the browscap data if the amount of time specified by the update
+    // timer has passed
+    if (($last_imported + $automatic_update_timer) < REQUEST_TIME) {
+      // Update the browscap information
+      _browscap_import();
 
-  // Update the browscap data if the amount of time specified by the update
-  // interval has passed
-  if (($last_imported + $update_interval) < REQUEST_TIME) {
-    // Update the browscap information
-    _browscap_import();
-
-    // Record when the browscap information was updated
-    variable_set('browscap_imported', REQUEST_TIME);
+      // Record when the browscap information was updated
+      variable_set('browscap_imported', REQUEST_TIME);
+    }
   }
 }
 

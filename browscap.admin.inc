@@ -16,23 +16,40 @@ function browscap_settings_form($form, &$form_state) {
     $version = t('Never fetched');
   }
 
-  $form['browscap_data_status'] = array(
+  $form['data'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('User agent detection settings'),
+  );
+  $form['data']['browscap_data_version'] = array(
     '#markup' => '<p>' . t('Current browscap data version: %fileversion.', array('%fileversion' => $version)) . '</p>',
   );
-  $form['browscap_update_interval'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Update interval'),
-    '#default_value' => variable_get('browscap_update_interval', 7),
-    '#description' => t('Control how often Browscap checks for new browser information. Enter 0 to disable updating.'),
-    '#field_suffix' => t('days'),
-    '#size' => 3,
-    '#maxlength' => 3,
-  );
-  $form['browscap_monitor'] = array(
+  $form['data']['browscap_enable_automatic_updates'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Monitor browsers'),
-    '#default_value' => variable_get('browscap_monitor', FALSE),
-    '#description' => t('Monitor all user agents visiting the site. View the reports in the <a href="!reports">Browscap reports</a> area.', array('!reports' => url('admin/reports/browscap'))),
+    '#title' => t('Enable automatic updates'),
+    '#default_value' => variable_get('browscap_enable_automatic_updates', TRUE),
+    '#description' => t('Automatically update the user agent detection information.'),
+  );
+  $form['data']['browscap_automatic_updates_timer'] = array(
+    '#type' => 'select',
+    '#title' => t('Check for new user agent detection information every'),
+    '#default_value' => variable_get('browscap_automatic_updates_timer', 604800),
+    '#options' => drupal_map_assoc(array(3600, 10800, 21600, 32400, 43200, 86400, 172800, 259200, 604800, 1209600, 2419200, 4838400, 9676800), 'format_interval'),
+    '#description' => t('Newer user agent detection information will be automatically downloaded and installed. (Requires a correctly configured <a href="@cron">cron maintenance task</a>.)', array('@cron' => url('admin/reports/status'))),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="browscap_enable_automatic_updates"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $form['user_agent_log'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('User agent log settings'),
+  );
+  $form['user_agent_log']['browscap_enable_user_agent_log'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable user agent log'),
+    '#default_value' => variable_get('browscap_enable_user_agent_log', FALSE),
+    '#description' => t('Increment a counter each time content is viewed by a user agent.'),
   );
   $form['actions']['browscap_refresh'] = array(
     '#type' => 'submit',
@@ -42,24 +59,6 @@ function browscap_settings_form($form, &$form_state) {
   );
 
   return system_settings_form($form);
-}
-
- /**
- * Validate the settings form.
- */
-function browscap_settings_form_validate($form, &$form_state) {
-  // Check the update interval
-  $update_interval = $form_state['values']['browscap_update_interval'];
-
-  // Ensure that the update interval is a number
-  if (!is_numeric($update_interval)) {
-    form_set_error('browscap_update_interval', t('The update interval must be a number.'));
-  }
-
-  // Ensure that the update interval is a non-negative number
-  if ($update_interval < 0) {
-    form_set_error('browscap_update_interval', t('The update interval must be non-negative.'));
-  }
 }
 
 /**
