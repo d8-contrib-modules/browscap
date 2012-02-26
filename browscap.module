@@ -18,6 +18,9 @@ function browscap_permission() {
     'view browscap reports' => array(
       'title' => t('View Browscap reports'),
     ),
+    'bypass browscap monitoring' => array(
+      'title' => t('Bypass Browscap monitoring'),
+    ),
   );
 }
 
@@ -96,8 +99,9 @@ function browscap_help($path, $arg) {
  * Implements hook_exit().
  */
 function browscap_exit() {
-  // Record the current user agent if monitoring is enabled
-  if (variable_get('browscap_enable_user_agent_log', FALSE) == TRUE) {
+  // Record the current user agent if monitoring is enabled and the user does not
+  // have permission to bypass monitoring
+  if (variable_get('browscap_enable_user_agent_log', FALSE) == TRUE && user_access('bypass browscap monitoring') != TRUE) {
     // Get browscap data about the current user agent
     $user_agent = browscap_get_browser();
 
