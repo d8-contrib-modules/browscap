@@ -4,8 +4,9 @@
  * Replacement for PHP's get_browser() function.
  */
 
-// Include browscap data import functions
+// Include browscap data import and user agent recording functions
 include_once('import.inc');
+include_once('record.inc');
 
 /**
  * Implements hook_permission().
@@ -96,43 +97,20 @@ function browscap_help($path, $arg) {
 }
 
 /**
+ * Implements hook_init().
+ */
+function browscap_init() {
+  // Record the user agent and set a flag to denote that the user agent was
+  // recorded during init() so it does not need to be recorded during exit()
+  _record_user_agent(TRUE, user_access('bypass browscap monitoring'));
+}
+
+/**
  * Implements hook_exit().
  */
 function browscap_exit() {
-  // Record the current user agent if monitoring is enabled and the user does not
-  // have permission to bypass monitoring
-  if (variable_get('browscap_enable_user_agent_log', FALSE) == TRUE && user_access('bypass browscap monitoring') != TRUE) {
-    // Get browscap data about the current user agent
-    $user_agent = browscap_get_browser();
-
-    // Identify the user agent using browscap data
-    // Otherwise, use the USER_AGENT header from the current request
-    if (!empty($user_agent['parent'])) {
-      $user_agent_string = substr(check_plain(trim($user_agent['parent'])), 0, 255);
-    }
-    else {
-      $user_agent_string = substr(check_plain(trim($_SERVER['HTTP_USER_AGENT'])), 0, 255);
-    }
-
-    // Determine if the user agent is a crawler using browscap data
-    // Otherwise, assume that the user agent isn't a crawler
-    if (!empty($user_agent['crawler'])) {
-      $user_agent_crawler = check_plain(trim($user_agent['crawler']));
-    }
-    else {
-      $user_agent_crawler = 0;
-    }
-
-    // Record the user agent in the database
-    db_merge('browscap_statistics')
-      ->key(array('parent' => $user_agent_string))
-      ->fields(array(
-        'counter' => 1,
-        'is_crawler' => $user_agent_crawler,
-      ))
-      ->expression('counter', 'counter + 1')
-      ->execute();
-  }
+  // Record the user agent
+  _record_user_agent();
 }
 
 /**
