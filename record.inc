@@ -51,7 +51,7 @@ function _record_user_agent($skip_futher_recording = FALSE, $bypass_monitoring =
       ))
       ->expression('counter', 'counter + 1')
       ->execute();
-    }
+  }
 
   // Change the status of user agent monitoring when necessary
   if ($skip_futher_recording == TRUE) {
