@@ -6,7 +6,6 @@
 
 // Include browscap data import and user agent recording functions
 include_once('import.inc');
-include_once('record.inc');
 
 /**
  * Implements hook_permission().
@@ -14,13 +13,7 @@ include_once('record.inc');
 function browscap_permission() {
   return array(
     'administer browscap' => array(
-      'title' => t('Administer Browscap reports'),
-    ),
-    'view browscap reports' => array(
-      'title' => t('View Browscap reports'),
-    ),
-    'bypass browscap monitoring' => array(
-      'title' => t('Bypass Browscap monitoring'),
+      'title' => t('Administer Browscap'),
     ),
   );
 }
@@ -37,45 +30,6 @@ function browscap_menu() {
     'access arguments' => array('administer browscap'),
     'file' => 'browscap.admin.inc',
   );
-  $items['admin/reports/browscap'] = array(
-    'title' => 'Browscap',
-    'description' => 'Browser-specific site statistics.',
-    'page callback' => 'browscap_top_useragents',
-    'page arguments' => array('all'),
-    'access arguments' => array('view browscap reports'),
-    'file' => 'browscap.reports.inc',
-  );
-  $items['admin/reports/browscap/useragents'] = array(
-    'title' => 'All',
-    'access arguments' => array('view browscap reports'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => 1,
-  );
-  $items['admin/reports/browscap/browsers'] = array(
-    'title' => 'Browsers',
-    'page callback' => 'browscap_top_useragents',
-    'page arguments' => array('browsers'),
-    'access arguments' => array('view browscap reports'),
-    'file' => 'browscap.reports.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 2,
-  );
-  $items['admin/reports/browscap/crawlers'] = array(
-    'title' => 'Crawlers',
-    'page callback' => 'browscap_top_useragents',
-    'page arguments' => array('crawlers'),
-    'access arguments' => array('view browscap reports'),
-    'file' => 'browscap.reports.inc',
-    'type' => MENU_LOCAL_TASK,
-    'weight' => 3,
-  );
-  $items['admin/reports/browscap/useragent/%'] = array(
-    'title' => 'Useragent details',
-    'page callback' => 'browscap_useragent_properties',
-    'page arguments' => array(4),
-    'access arguments' => array('view browscap reports'),
-    'file' => 'browscap.user_agent.inc',
-  );
 
   return $items;
 }
@@ -87,30 +41,7 @@ function browscap_help($path, $arg) {
   switch ($path) {
     case 'admin/config/system/browscap':
       return '<p>' . t('Settings for user agent detection and the log that Browscap will keep about user agents that visit the site. See <a href="@statistics">user agent statistics</a> for the actual information.', array('@statistics' => url('admin/reports/browscap'))) . '</p>';
-    case 'admin/reports/browscap':
-      return '<p>' . t('This page displays the most popular visiting user agents.') . '</p>';
-    case 'admin/reports/browscap/browsers':
-      return '<p>' . t('This page displays the most popular visiting user agents which have been classified as browsers.') . '</p>';
-    case 'admin/reports/browscap/crawlers':
-      return '<p>' . t('This page displays the most popular visiting user agents which have been classified as crawlers.') . '</p>';
   }
-}
-
-/**
- * Implements hook_init().
- */
-function browscap_init() {
-  // Record the user agent and set a flag to denote that the user agent was
-  // recorded during init() so it does not need to be recorded during exit()
-  _record_user_agent(TRUE, user_access('bypass browscap monitoring'));
-}
-
-/**
- * Implements hook_exit().
- */
-function browscap_exit() {
-  // Record the user agent
-  _record_user_agent();
 }
 
 /**

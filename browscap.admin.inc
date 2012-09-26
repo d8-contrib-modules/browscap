@@ -41,16 +41,6 @@ function browscap_settings_form($form, &$form_state) {
       ),
     ),
   );
-  $form['user_agent_log'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('User agent log settings'),
-  );
-  $form['user_agent_log']['browscap_enable_user_agent_log'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Enable user agent log'),
-    '#default_value' => variable_get('browscap_enable_user_agent_log', FALSE),
-    '#description' => t('Increment a counter each time content is viewed by a user agent.'),
-  );
   $form['actions']['browscap_refresh'] = array(
     '#type' => 'submit',
     '#value' => t('Refresh browscap data'),

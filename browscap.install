@@ -23,27 +23,6 @@ function browscap_schema() {
     ),
     'primary key' => array('useragent'),
   );
-  $schema['browscap_statistics'] = array(
-    'fields' => array(
-      'parent' => array(
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
-      ),
-      'counter' => array(
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-      ),
-      'is_crawler' => array(
-        'type' => 'int',
-        'size' => 'tiny',
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('parent'),
-  );
   $schema['cache_browscap'] = array(
     'fields' => array(
       'cid' => array(
@@ -103,33 +82,4 @@ function browscap_uninstall() {
   variable_del('browscap_version');
   variable_del('browscap_enable_automatic_updates');
   variable_del('browscap_automatic_updates_timer');
-  variable_del('browscap_enable_user_agent_log');
-}
-
-/**
- * Set the version number for new Browscap installations.
- */
-function browscap_update_7000() {
-  $return = array();
-
-  return $return;
-}
-
-/**
- * Port and remove old variables.
- */
-function browscap_update_7001() {
-  // Port and remove browscap_update_interval
-  $browscap_update_interval = variable_get('browscap_update_interval', 7);
-
-  if ($browscap_update_interval == 0) {
-    variable_set('browscap_enable_automatic_updates', FALSE);
-  }
-
-  variable_del('browscap_update_interval');
-
-  // Port and remove browscap_monitor
-  $browscap_monitor = variable_get('browscap_monitor', FALSE);
-  variable_set('browscap_enable_user_agent_log', $browscap_monitor);
-  variable_del('browscap_monitor');
 }
