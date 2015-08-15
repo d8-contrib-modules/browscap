@@ -1,0 +1,4 @@
+name: Browscap
+description: Provides a replacement for PHPs get_browser() function.
+core: 8.x
+type: module

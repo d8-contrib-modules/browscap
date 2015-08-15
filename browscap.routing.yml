@@ -1,0 +1,7 @@
+browscap.admin:
+  path: '/admin/config/system/browscap'
+  defaults:
+    _form: '\Drupal\browscap\Form\BrowscapAdmin'
+    _title: 'Browscap'
+  requirements:
+    _permission: 'administer browscap'
