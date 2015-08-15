@@ -1,4 +1,0 @@
-name = Browscap
-description = Provides a replacement for PHPs get_browser() function.
-core = 7.x
-configure = admin/config/system/browscap

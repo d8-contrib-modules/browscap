@@ -4,6 +4,7 @@
  * Install, update and uninstall functions for the Browscap module.
  */
 
+use Drupal\browscap\BrowscapImporter;
 /**
  * Implements hook_install().
  */
@@ -12,7 +13,7 @@ function browscap_schema() {
     'fields' => array(
       'useragent' => array(
         'type' => 'varchar',
-        'length' => 255,
+        'length' => 191,
         'not null' => TRUE,
         'default' => '',
       ),
@@ -23,7 +24,6 @@ function browscap_schema() {
     ),
     'primary key' => array('useragent'),
   );
-  $schema['cache_browscap'] = drupal_get_schema_unprocessed('system', 'cache');
 
   return $schema;
 }
@@ -33,18 +33,10 @@ function browscap_schema() {
  */
 function browscap_install() {
   // Update the browscap information
-  _browscap_import();
+  BrowscapImporter::import();
 
   // Record when the browscap information was updated
-  variable_set('browscap_imported', REQUEST_TIME);
-}
-
-/**
- * Implements hook_uninstall().
- */
-function browscap_uninstall() {
-  variable_del('browscap_imported');
-  variable_del('browscap_version');
-  variable_del('browscap_enable_automatic_updates');
-  variable_del('browscap_automatic_updates_timer');
+  \Drupal::configFactory()->getEditable('browscap.settings')
+    ->set('browscap_imported', REQUEST_TIME)
+    ->save();
 }
