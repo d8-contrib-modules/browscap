@@ -35,7 +35,7 @@ class BrowscapAdmin extends ConfigFormBase {
     $form = array();
 
     // Check the local browscap data version number
-    $version = $config->get('version');
+    $version = $config->get('browscap_version');
 
     // If the version number is 0 then browscap data has never been fetched
     if ($version == 0) {
