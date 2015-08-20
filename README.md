@@ -24,12 +24,12 @@ Installation
 ------------
 
 Browscap can be installed via the standard Drupal installation process.
-http://drupal.org/node/895232
+http://www.drupal.org/node/1897420
 
 API
 ---
 
-Modules can make use of browscap data by calling browscap_get_browser()
+Modules can make use of browscap data by calling the browscap service ("\Drupal::service('browscap')->getBrowser();")
 anywhere they would otherwise call the PHP get_browser()
 (http://us3.php.net/manual/en/function.get-browser.php) function.
 
