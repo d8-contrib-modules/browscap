@@ -34,10 +34,11 @@ function browscap_schema() {
  */
 function browscap_install() {
   // Update the browscap information
-  BrowscapImporter::import();
+  //$endpoint = new BrowscapEndpoint();
+  //BrowscapImporter::import();
 
   // Record when the browscap information was updated
-  \Drupal::configFactory()->getEditable('browscap.settings')
-    ->set('browscap_imported', REQUEST_TIME)
-    ->save();
+  /*\Drupal::configFactory()->getEditable('browscap.settings')
+    ->set('imported', REQUEST_TIME)
+    ->save();*/
 }

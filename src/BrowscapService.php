@@ -40,12 +40,12 @@ class BrowscapService {
     }
 
     // Check the cache for user agent data
-    $cache->get($user_agent);
+    $data = $cache->get($user_agent);
 
     // Attempt to find a cached user agent
     // Otherwise store the user agent data in the cache
-    if (!empty($cache) && ($cache->created > REQUEST_TIME - 60 * 60 * 24)) {
-      $user_agent_properties = $cache->data;
+    if (!empty($data) && ($data->created > REQUEST_TIME - 60 * 60 * 24)) {
+      $user_agent_properties = $data->data;
     }
     else {
       // Find the user agent's properties

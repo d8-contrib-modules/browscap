@@ -1,6 +1,6 @@
 enable_automatic_updates: TRUE
-automatic_updates_timer: 604800
+automatic_updates_timer: '604800'
 version_url: 'http://www.browscap.org/version-number'
 data_url: 'http://www.browscap.org/stream?q=PHP_BrowsCapINI'
-version: 0
+version: '0'
 imported: 0
