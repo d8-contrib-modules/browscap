@@ -1,3 +1,5 @@
+Test Change
+
 Browscap provides an improved version of PHP's get_browser() function.
 
 The get_browser() function can be used to tell what a visitor's browser is
