@@ -13,10 +13,12 @@ use Drupal\browscap\BrowscapImporter;
 class BrowscapEndpoint{
 
   public function getVersion() {
+    $config = \Drupal::config('browscap.settings');
     // Retrieve the current browscap data version number using HTTP
     $client = \Drupal::httpClient();
     try {
-      $response = $client->get('http://www.browscap.org/version-number');
+      $browscapVersionURL = $config->get('version_url');
+      $response = $client->get($browscapVersionURL);
       // Expected result.
       $current_version = (string) $response->getBody();
     } catch (RequestException $e) {
@@ -38,7 +40,7 @@ class BrowscapEndpoint{
   }
 
   public function getBrowscapData($cron = TRUE) {
-
+    $config = \Drupal::config('browscap.settings');
     $client = \Drupal::httpClient();
 
     // Set options for downloading data with or without compression.
@@ -54,7 +56,8 @@ class BrowscapEndpoint{
 
     // Retrieve the browscap data using HTTP
     try {
-      $response = $client->get('http://www.browscap.org/stream?q=PHP_BrowsCapINI', $options);
+      $browscapDataURL = $config->get('data_url');
+      $response = $client->get($browscapDataURL, $options);
 
       // getBody will decompress gzip if need be
       $browscap_data = (string) $response->getBody();
