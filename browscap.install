@@ -8,7 +8,7 @@ use Drupal\browscap\BrowscapImporter;
 use Drupal\browscap\BrowscapEndpoint;
 
 /**
- * Implements hook_install().
+ * Implements hook_schema().
  */
 function browscap_schema() {
   $schema['browscap'] = array(
