@@ -4,9 +4,6 @@
  * Install, update and uninstall functions for the Browscap module.
  */
 
-use Drupal\browscap\BrowscapImporter;
-use Drupal\browscap\BrowscapEndpoint;
-
 /**
  * Implements hook_schema().
  */
