@@ -6,6 +6,7 @@
 
 use \Drupal\browscap\BrowscapImporter;
 use \Drupal\Core\Url;
+use Drupal\browscap\BrowscapEndpoint;
 
 /**
  * Implements hook_help().
@@ -23,21 +24,22 @@ function browscap_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $ro
  */
 function browscap_cron() {
   $config = \Drupal::configFactory()->getEditable('browscap.settings');
-  if ($config->get('browscap_enable_automatic_updates') == TRUE) {
+  if ($config->get('enable_automatic_updates') == TRUE) {
     // Check the current update timer
-    $automatic_update_timer = $config->get('browscap_automatic_updates_timer');
+    $automatic_update_timer = $config->get('automatic_updates_timer');
 
     // Check when the last update occurred
-    $last_imported = $config->get('browscap_imported');
+    $last_imported = $config->get('imported');
 
     // Update the browscap data if the amount of time specified by the update
     // timer has passed
     if (($last_imported + $automatic_update_timer) < REQUEST_TIME) {
       // Update the browscap information
-      BrowscapImporter::import();
+      $endpoint = new BrowscapEndpoint();
+      BrowscapImporter::import($endpoint);
 
       // Record when the browscap information was updated
-      $config->set('browscap_imported', REQUEST_TIME);
+      $config->set('imported', REQUEST_TIME);
     }
   }
 }
