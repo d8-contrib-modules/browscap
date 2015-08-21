@@ -9,13 +9,7 @@ namespace Drupal\browscap;
 
 class BrowscapEndpoint{
 
-  public function getBrowscapData($cron = TRUE) {
-    // Check the local browscap data version number.
-    $config = \Drupal::config('browscap.settings');
-
-    $local_version = $config->get('version');
-    \Drupal::logger('browscap')->notice('Checking for new browscap version...');
-
+  public function getVersion() {
     // Retrieve the current browscap data version number using HTTP
     $client = \Drupal::httpClient();
     try {
@@ -31,30 +25,18 @@ class BrowscapEndpoint{
       // Log a message with the watchdog
       \Drupal::logger('browscap')
         ->error("Couldn't check version: %error", array('%error' => $current_version->error));
-
-      // Display a message to the user if the update process was triggered manually
-      if ($cron == FALSE) {
-        drupal_set_message(t("Couldn't check version: %error", array('%error' => $current_version->error)), 'error');
-      }
       return BrowscapImporter::BROWSCAP_IMPORT_VERSION_ERROR;
     }
 
     // Sanitize the returned version number
     $current_version = SafeMarkup::checkPlain(trim($current_version));
 
-    // Compare the current and local version numbers to determine if the browscap
-    // data requires updating.
-    if ($current_version == $local_version) {
-      // Log a message with the watchdog.
-      \Drupal::logger('browscap')->info('No new version of browscap to import');
+    return $current_version;
+  }
 
-      // Display a message to user if the update process was triggered manually.
-      if ($cron == FALSE) {
-        drupal_set_message(t('No new version of browscap to import'));
-      }
+  public function getBrowscapData($cron = TRUE) {
 
-      return BrowscapImporter::BROWSCAP_IMPORT_NO_NEW_VERSION;
-    }
+    $client = \Drupal::httpClient();
 
     // Set options for downloading data with or without compression.
     /*if (function_exists('gzdecode')) {
@@ -96,6 +78,6 @@ class BrowscapEndpoint{
       $browscap_data = gzdecode($browscap_data);
     }*/
 
-    return array($current_version, $browscap_data);
+    return $browscap_data;
   }
 }
