@@ -1,0 +1,22 @@
+browscap.settings:
+  type: config_object
+  label: 'Browscap settings'
+  mapping:
+    enable_automatic_updates:
+      type: boolean
+      label: 'Enable Automatic Updates'
+    automatic_updates_timer:
+      type: string
+      label: 'Automatic Updates Timer'
+    version_url:
+      type: string
+      label: 'Version URL'
+    data_url:
+      type: string
+      label: 'Data URL'
+    version:
+      type: string
+      label: 'Data Version'
+    imported:
+      type: integer
+      label: 'Last imported time'

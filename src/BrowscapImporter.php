@@ -7,7 +7,6 @@
 
 namespace Drupal\browscap;
 
-use Drupal\Component\Utility\SafeMarkup;
 use Drupal\Core\Database\Database;
 
 /**
@@ -36,116 +35,38 @@ class BrowscapImporter {
    *   - BROWSCAP_IMPORT_VERSION_ERROR: Checking the current data version failed.
    *   - BROWSCAP_IMPORT_DATA_ERROR: The data could not be downloaded or parsed.
    */
-  static function import($cron = TRUE) {
+  static function import(BrowscapEndpoint $browscap, $cron = TRUE) {
     // Check the local browscap data version number.
     $config = \Drupal::configFactory()->getEditable('browscap.settings');
 
-    $local_version = $config->get('browscap_version');
-    \Drupal::logger('browscap')->notice('Checking for new browscap version...');
-
-    // Retrieve the current browscap data version number using HTTP
-    $client = \Drupal::httpClient();
-    try {
-      $response = $client->get('http://www.browscap.org/version-number');
-      // Expected result.
-      $current_version = (string) $response->getBody();
-    } catch (RequestException $e) {
-      \Drupal::logger('browscap')->error($e->getMessage());
-    }
-
-    // Log an error if the browscap version number could not be retrieved
-    if (isset($current_version->error)) {
-      // Log a message with the watchdog
-      \Drupal::logger('browscap')
-        ->error("Couldn't check version: %error", array('%error' => $current_version->error));
-
-      // Display a message to the user if the update process was triggered manually
-      if ($cron == FALSE) {
-        drupal_set_message(t("Couldn't check version: %error", array('%error' => $current_version->error)), 'error');
-      }
-
-      return BROWSCAP_IMPORT_VERSION_ERROR;
-    }
-
-    // Sanitize the returned version number
-    $current_version = SafeMarkup::checkPlain(trim($current_version));
-
-    // Compare the current and local version numbers to determine if the browscap
-    // data requires updating.
-    if ($current_version == $local_version) {
-      // Log a message with the watchdog.
-      \Drupal::logger('browscap')->info('No new version of browscap to import');
-
-      // Display a message to user if the update process was triggered manually.
-      if ($cron == FALSE) {
-        drupal_set_message(t('No new version of browscap to import'));
-      }
-
-      return BROWSCAP_IMPORT_NO_NEW_VERSION;
-    }
-
-    // Set options for downloading data with or without compression.
-    /*if (function_exists('gzdecode')) {
-      $options = array(
-        'headers' => array('Accept-Encoding' => 'gzip'),
-      );
-    }
-    else {*/
-      // The download takes over ten times longer without gzip, and may exceed
-      // the default timeout of 30 seconds, so we increase the timeout.
-      $options = array('timeout' => 600);
-    //}
-
-    // Retrieve the browscap data using HTTP
-    try {
-      $response = $client->get('http://www.browscap.org/stream?q=PHP_BrowsCapINI', $options);
-      $browscap_data = (string) $response->getBody();
-      // Expected result.
-    } catch (RequestException $e) {
-      watchdog_exception('browscap', $e->getMessage());
-    }
-
-    // Log an error if the browscap data could not be retrieved
-    if (isset($response->error) || empty($response)) {
-      // Log a message with the watchdog
-      \Drupal::logger('browscap')
-        ->error("Couldn't retrieve updated browscap: %error", array('%error' => $browscap_data->error));
-
-      // Display a message to the user if the update process was triggered manually
-      if ($cron == FALSE) {
-        drupal_set_message(t("Couldn't retrieve updated browscap: %error", array('%error' => $response->error)), 'error');
-      }
-
-      return BROWSCAP_IMPORT_DATA_ERROR;
-    }
-
-    // Decompress the downloaded data if it is compressed.
-    /*if (function_exists('gzdecode')) {
-      $browscap_data = gzdecode($browscap_data);
-    }*/
+    $browscap_data = $browscap->getBrowscapData($cron);
+    $current_version = array_shift($browscap_data);
+    $browscap_data = array_shift($browscap_data);
 
     // Process the browscap data.
     $result = static::processData($browscap_data);
-    if (!$result) {
-      return BROWSCAP_IMPORT_DATA_ERROR;
+    //If it's not an array, it's an error.
+    if ($result != static::BROWSCAP_IMPORT_OK) {
+      return FALSE;
     }
 
     // Clear the browscap data cache.
     \Drupal::cache('browscap')->invalidateAll();
 
     // Update the browscap version and imported time.
-    $config->set('browscap_version', $current_version);
-    $config->set('browscap_imported', REQUEST_TIME);
+    $config->set('version', $current_version)
+      ->set('imported', REQUEST_TIME)
+      ->save();
 
     // Log a message with the watchdog.
-    \Drupal::logger('browscap')->notice('New version of browscap imported: %version', array('%version' => $version));
+    \Drupal::logger('browscap')->notice('New version of browscap imported: %version', array('%version' => $current_version));
 
     // Display a message to user if the update process was triggered manually.
     if ($cron == FALSE) {
-      drupal_set_message(t('New version of browscap imported: %version', array('%version' => $version)));
+      drupal_set_message(t('New version of browscap imported: %version', array('%version' => $current_version)));
     }
 
-    return BROWSCAP_IMPORT_OK;
+    return TRUE;
   }
 
   /**
@@ -171,14 +92,14 @@ class BrowscapImporter {
     $header_division = static::getNextIniDivision($browscap_data);
     // Assert that header division less than length of entire INI string.
     if (strlen($header_division) >= strlen($browscap_data)) {
-      return FALSE;
+      return static::BROWSCAP_IMPORT_DATA_ERROR;
     }
 
     // Skip the version division.
     $version_divison = static::getNextIniDivision($browscap_data);
     // Assert that Version section in division string.
     if (strpos($version_divison, "Browscap Version") === FALSE) {
-      return FALSE;
+      return static::BROWSCAP_IMPORT_DATA_ERROR;
     }
 
     // Get default properties division.
@@ -186,7 +107,7 @@ class BrowscapImporter {
     $default_properties_division = static::getNextIniDivision($browscap_data);
     // Assert that DefaultProperties section in division string.
     if (strpos($default_properties_division, "[DefaultProperties]") === FALSE) {
-      return FALSE;
+      return static::BROWSCAP_IMPORT_DATA_ERROR;
     }
 
     // Parse and save remaining divisions.
@@ -198,11 +119,11 @@ class BrowscapImporter {
       $parsed_divisions = static::parseData($divisions);
       if (!$parsed_divisions) {
         // There was an error parsing the data.
-        return FALSE;
+        return static::BROWSCAP_IMPORT_DATA_ERROR;
       }
       static::saveParsedData($parsed_divisions);
     }
-    return TRUE;
+    return static::BROWSCAP_IMPORT_OK;
   }
 
   private static function parseData(&$browscap_data) {
