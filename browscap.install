@@ -30,17 +30,3 @@ function browscap_schema() {
 
   return $schema;
 }
-
-/**
- * Implements hook_install().
- */
-function browscap_install() {
-  // Update the browscap information
-  $endpoint = new BrowscapEndpoint();
-  BrowscapImporter::import($endpoint);
-
-  // Record when the browscap information was updated
-  \Drupal::configFactory()->getEditable('browscap.settings')
-    ->set('imported', REQUEST_TIME)
-    ->save();
-}
