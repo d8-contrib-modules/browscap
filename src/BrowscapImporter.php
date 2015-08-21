@@ -16,10 +16,10 @@ use Drupal\Core\Database\Database;
  */
 class BrowscapImporter {
 
-  const BROWSCAP_IMPORT_OK = 0;
-  const BROWSCAP_IMPORT_VERSION_ERROR = 1;
-  const BROWSCAP_IMPORT_NO_NEW_VERSION = 2;
-  const BROWSCAP_IMPORT_DATA_ERROR = 3;
+  const BROWSCAP_IMPORT_OK = 1;
+  const BROWSCAP_IMPORT_VERSION_ERROR = -1;
+  const BROWSCAP_IMPORT_NO_NEW_VERSION = -2;
+  const BROWSCAP_IMPORT_DATA_ERROR = -3;
 
   /**
    * Helper function to update the browscap data.
@@ -36,18 +36,46 @@ class BrowscapImporter {
    *   - BROWSCAP_IMPORT_DATA_ERROR: The data could not be downloaded or parsed.
    */
   static function import(BrowscapEndpoint $browscap, $cron = TRUE) {
-    // Check the local browscap data version number.
+
     $config = \Drupal::configFactory()->getEditable('browscap.settings');
 
+    /*
+     * Check if there is a new version
+     */
+    $local_version = $config->get('version');
+    \Drupal::logger('browscap')->notice('Checking for new browscap version...');
+    $current_version = $browscap->getVersion();
+
+    // Was it an error?
+    if ($current_version == BrowscapImporter::BROWSCAP_IMPORT_VERSION_ERROR) {
+      // Display a message to the user if the update process was triggered manually
+      if ($cron == FALSE) {
+        drupal_set_message(t("Couldn't check version."), 'error');
+      }
+      return BrowscapImporter::BROWSCAP_IMPORT_VERSION_ERROR;
+    }
+
+    // Did the
+    if ($current_version == $local_version) {
+      // Log a message with the watchdog.
+      \Drupal::logger('browscap')->info('No new version of browscap to import');
+      // Display a message to user if the update process was triggered manually.
+      if ($cron == FALSE) {
+        drupal_set_message(t('No new version of browscap to import'));
+      }
+      return BrowscapImporter::BROWSCAP_IMPORT_NO_NEW_VERSION;
+    }
+
+    /*
+     * If there is a new version retrieve the new data
+     */
     $browscap_data = $browscap->getBrowscapData($cron);
-    $current_version = array_shift($browscap_data);
-    $browscap_data = array_shift($browscap_data);
 
     // Process the browscap data.
     $result = static::processData($browscap_data);
     //If it's not an array, it's an error.
     if ($result != static::BROWSCAP_IMPORT_OK) {
-      return FALSE;
+      return $result;
     }
 
     // Clear the browscap data cache.
@@ -66,7 +94,7 @@ class BrowscapImporter {
       drupal_set_message(t('New version of browscap imported: %version', array('%version' => $current_version)));
     }
 
-    return TRUE;
+    return static::BROWSCAP_IMPORT_OK;
   }
 
   /**
