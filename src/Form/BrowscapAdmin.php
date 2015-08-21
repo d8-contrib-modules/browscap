@@ -70,6 +70,20 @@ class BrowscapAdmin extends ConfigFormBase {
         ),
       ),
     );
+
+    $form['data']['browscap_version_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Browscap version URL'),
+      '#default_value' => $config->get('version_url'),
+      '#description' => t('The URL to the information about the current Browscap version available.'),
+    );
+    $form['data']['browscap_data_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Browscap data URL'),
+      '#default_value' => $config->get('data_url'),
+      '#description' => t('The URL to Browscap data.'),
+    );
+
     $form['actions']['browscap_refresh'] = array(
       '#type' => 'submit',
       '#value' => t('Refresh browscap data'),
@@ -87,6 +101,8 @@ class BrowscapAdmin extends ConfigFormBase {
     $this->config('browscap.settings')
       ->set('automatic_updates_timer', $form_state->getValue('browscap_automatic_updates_timer'))
       ->set('enable_automatic_updates', $form_state->getValue('browscap_enable_automatic_updates'))
+      ->set('data_url', $form_state->getValue('browscap_data_url'))
+      ->set('version_url', $form_state->getValue('browscap_version_url'))
       ->save();
     drupal_set_message('Password Strength settings have been stored');
     parent::submitForm($form, $form_state);
