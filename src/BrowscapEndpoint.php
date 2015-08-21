@@ -7,6 +7,9 @@
 
 namespace Drupal\browscap;
 
+use Drupal\Component\Utility\SafeMarkup;
+use Drupal\browscap\BrowscapImporter;
+
 class BrowscapEndpoint{
 
   public function getVersion() {
@@ -39,20 +42,21 @@ class BrowscapEndpoint{
     $client = \Drupal::httpClient();
 
     // Set options for downloading data with or without compression.
-    /*if (function_exists('gzdecode')) {
+    if (function_exists('gzdecode')) {
       $options = array(
         'headers' => array('Accept-Encoding' => 'gzip'),
       );
+    } else {
+      // The download takes over ten times longer without gzip, and may exceed
+      // the default timeout of 30 seconds, so we increase the timeout.
+      $options = array('timeout' => 600);
     }
-    else {*/
-    // The download takes over ten times longer without gzip, and may exceed
-    // the default timeout of 30 seconds, so we increase the timeout.
-    $options = array('timeout' => 600);
-    //}
 
     // Retrieve the browscap data using HTTP
     try {
       $response = $client->get('http://www.browscap.org/stream?q=PHP_BrowsCapINI', $options);
+
+      // getBody will decompress gzip if need be
       $browscap_data = (string) $response->getBody();
       // Expected result.
     } catch (RequestException $e) {
@@ -72,11 +76,6 @@ class BrowscapEndpoint{
 
       return BrowscapImporter::BROWSCAP_IMPORT_DATA_ERROR;
     }
-
-    // Decompress the downloaded data if it is compressed.
-    /*if (function_exists('gzdecode')) {
-      $browscap_data = gzdecode($browscap_data);
-    }*/
 
     return $browscap_data;
   }
