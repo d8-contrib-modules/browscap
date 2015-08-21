@@ -5,6 +5,8 @@
  */
 
 use Drupal\browscap\BrowscapImporter;
+use Drupal\browscap\BrowscapEndpoint;
+
 /**
  * Implements hook_install().
  */
@@ -34,11 +36,11 @@ function browscap_schema() {
  */
 function browscap_install() {
   // Update the browscap information
-  //$endpoint = new BrowscapEndpoint();
-  //BrowscapImporter::import();
+  $endpoint = new BrowscapEndpoint();
+  BrowscapImporter::import($endpoint);
 
   // Record when the browscap information was updated
-  /*\Drupal::configFactory()->getEditable('browscap.settings')
+  \Drupal::configFactory()->getEditable('browscap.settings')
     ->set('imported', REQUEST_TIME)
-    ->save();*/
+    ->save();
 }
