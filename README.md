@@ -39,7 +39,7 @@ Credits
 -------
 
 Development of Browscap is sponsored by Acquia (http://www.acquia.com) and the
-Ontario Ministry of Northern Development and Mines (http://www.mndm.gov.on.ca).
+Ontario Ministry of Northern Development and Mines (http://www.mndm.gov.on.ca)
 
 A special thanks goes out to Gary Keith (http://www.garykeith.com) who provides
 regular updates to the browscap user agent database, and specifically for
