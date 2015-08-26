@@ -8,7 +8,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Datetime\DateFormatter;
 
-
 class BrowscapAdmin extends ConfigFormBase {
 
 
@@ -62,7 +61,8 @@ class BrowscapAdmin extends ConfigFormBase {
       '#type' => 'select',
       '#title' => t('Check for new user agent detection information every'),
       '#default_value' => $config->get('browscap_automatic_updates_timer'),
-      //'#description' => t('Newer user agent detection information will be automatically downloaded and installed. (Requires a correctly configured <a href="@cron">cron maintenance task</a>.)', array('@cron' => Url::fromRoute('system.status')->getUri())),
+      '#options' => array_map('format_interval',array(3600, 10800, 21600, 32400, 43200, 86400, 172800, 259200, 604800, 1209600, 2419200, 4838400, 9676800)),
+      '#description' => t('Newer user agent detection information will be automatically downloaded and installed. (Requires a correctly configured <a href="@cron">cron maintenance task</a>.)', array('@cron' => Url::fromRoute('system.status'))),
       '#states' => array(
         'visible' => array(
           ':input[name="browscap_enable_automatic_updates"]' => array('checked' => TRUE),
