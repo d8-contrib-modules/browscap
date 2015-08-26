@@ -1,4 +1,7 @@
 <?php
+
+use \Drupal\Core\Url;
+
 /**
  * @file
  * Install, update and uninstall functions for the Browscap module.
@@ -26,4 +29,9 @@ function browscap_schema() {
   );
 
   return $schema;
+}
+
+function browscap_install() {
+  //Tell the user to run the import
+  drupal_set_message('You are required to run Browscap\'s import before utilizing the service.');
 }
