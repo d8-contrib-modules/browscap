@@ -5,6 +5,5 @@ services:
     class: Drupal\Core\Cache\CacheBackendInterface
     tags:
       - { name: cache.bin }
-    factory_method: get
-    factory_service: cache_factory
+    factory_method: cache_factory:get
     arguments: [browscap]
