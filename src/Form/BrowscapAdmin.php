@@ -61,8 +61,8 @@ class BrowscapAdmin extends ConfigFormBase {
       '#type' => 'select',
       '#title' => t('Check for new user agent detection information every'),
       '#default_value' => $config->get('browscap_automatic_updates_timer'),
-      '#options' => array_map('format_interval',array(3600, 10800, 21600, 32400, 43200, 86400, 172800, 259200, 604800, 1209600, 2419200, 4838400, 9676800)),
-      '#description' => t('Newer user agent detection information will be automatically downloaded and installed. (Requires a correctly configured <a href="@cron">cron maintenance task</a>.)', array('@cron' => Url::fromRoute('system.status'))),
+      '#options' => array_map(array($dateformatter,'formatInterval'), array_combine($options, $options)),
+      '#description' => t('Newer user agent detection information will be automatically downloaded and installed. (Requires a correctly configured '. \Drupal::l("cron maintenance task", Url::fromRoute('system.status')) . '.'),
       '#states' => array(
         'visible' => array(
           ':input[name="browscap_enable_automatic_updates"]' => array('checked' => TRUE),

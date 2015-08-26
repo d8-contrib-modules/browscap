@@ -13,7 +13,8 @@ use \Drupal\Core\Url;
 function browscap_help($route_name, \Drupal\Core\Routing\RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'browscap.admin':
-      return '<p>' . t('Settings for user agent detection and the log that Browscap will keep about user agents that visit the site. See <a href="@statistics">user agent statistics</a> for the actual information.', array('@statistics' => Url::fromRoute('browscap.admin')->getUri())) . '</p>';
+      return '<p>' . t('Settings for user agent detection and the log that Browscap will keep about user agents that visit the site. See ' . Drupal::l('user agent statistics', Url::fromRoute('browscap.admin')) . ' for the actual information.') . '</p>';
+      break;
   }
 }
 
