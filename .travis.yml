@@ -17,11 +17,10 @@ env:
     - DRUPAL_TI_WEBSERVER_URL="http://127.0.0.1"
     - DRUPAL_TI_WEBSERVER_PORT="8080"
     - DRUPAL_TI_SIMPLETEST_ARGS="--verbose --color --url $DRUPAL_TI_WEBSERVER_URL:$DRUPAL_TI_WEBSERVER_PORT"
-    - DRUPAL_TI_PHPUNIT_CORE_SRC_DIRECTORY="./tests/src"
     - DRUPAL_TI_ENVIRONMENT="drupal-8"
 
   matrix:
-    - DRUPAL_TI_RUNNERS="simpletest phpunit-core"
+    - DRUPAL_TI_RUNNERS="simpletest"
 
 before_install:
   - composer self-update
@@ -33,7 +32,6 @@ install:
 
 before_script:
   - drupal-ti before_script
-  - DRUPAL_TI_PHPUNIT_ARGS="-c $DRUPAL_TI_DRUPAL_DIR/modules/browscap/phpunit.xml --coverage-text"
 
 script:
   - drupal-ti script
