@@ -160,12 +160,12 @@ class BrowscapImporter {
     // Replace 'true' and 'false' with '1' and '0'
     $browscap_data = preg_replace(
       array(
-        "/=\s*true\s*\n/",
-        "/=\s*false\s*\n/",
+        '/=\s*"?true"?\s*$/m',
+        '/=\s*"?false"?\s*$/m',
       ),
       array(
-        "=1\n",
-        "=0\n",
+        "=1",
+        "=0",
       ),
       $browscap_data
     );
