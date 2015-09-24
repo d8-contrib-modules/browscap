@@ -156,37 +156,22 @@ class BrowscapImporter {
 
   private static function parseData(&$browscap_data) {
     // Parse the returned browscap data.
-    // The parse_ini_string function is preferred but only available in PHP 5.3.0.
-    if (version_compare(PHP_VERSION, '5.3.0', '>=')) {
-      // Replace 'true' and 'false' with '1' and '0'
-      $browscap_data = preg_replace(
-        array(
-          "/=\s*true\s*\n/",
-          "/=\s*false\s*\n/",
-        ),
-        array(
-          "=1\n",
-          "=0\n",
-        ),
-        $browscap_data
-      );
 
-      // Parse the browscap data as a string.
-      $browscap_data = parse_ini_string($browscap_data, TRUE, INI_SCANNER_RAW);
-    } else {
-      // Create a path and filename
-      $server = $_SERVER['SERVER_NAME'];
-      $path = \Drupal::config('system.file')->get('path.temporary');
-      $file = "$path/browscap_$server.ini";
+    // Replace 'true' and 'false' with '1' and '0'
+    $browscap_data = preg_replace(
+      array(
+        "/=\s*true\s*\n/",
+        "/=\s*false\s*\n/",
+      ),
+      array(
+        "=1\n",
+        "=0\n",
+      ),
+      $browscap_data
+    );
 
-      // Write the browscap data to a file
-      $browscap_file = fopen($file, "w");
-      fwrite($browscap_file, $browscap_data);
-      fclose($browscap_file);
-
-      // Parse the browscap data as a file
-      $browscap_data = parse_ini_file($file, TRUE);
-    }
+    // Parse the browscap data as a string.
+    $browscap_data = parse_ini_string($browscap_data, TRUE, INI_SCANNER_RAW);
 
     return $browscap_data;
   }
