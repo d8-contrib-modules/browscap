@@ -63,7 +63,7 @@ class BrowscapAdmin extends ConfigFormBase {
       '#title' => t('Check for new user agent detection information every'),
       '#default_value' => $config->get('automatic_updates_timer'),
       '#options' => array_map(array($dateformatter,'formatInterval'), array_combine($options, $options)),
-      '#description' => t('Newer user agent detection information will be automatically downloaded and installed. (Requires a correctly configured '. \Drupal::l("cron maintenance task", Url::fromRoute('system.status')) . '.'),
+      '#description' => t('Newer user agent detection information will be automatically downloaded and installed. (Requires a correctly configured '. \Drupal::l("cron maintenance task", Url::fromRoute('system.status')) . ').'),
       '#states' => array(
         'visible' => array(
           ':input[name="browscap_enable_automatic_updates"]' => array('checked' => TRUE),
@@ -104,7 +104,6 @@ class BrowscapAdmin extends ConfigFormBase {
       ->set('data_url', $form_state->getValue('browscap_data_url'))
       ->set('version_url', $form_state->getValue('browscap_version_url'))
       ->save();
-    drupal_set_message('Password Strength settings have been stored');
     parent::submitForm($form, $form_state);
   }
 
