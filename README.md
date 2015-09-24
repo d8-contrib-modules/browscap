@@ -24,21 +24,21 @@ Installation
 ------------
 
 Browscap can be installed via the standard Drupal installation process.
-http://www.drupal.org/node/1897420
+https://www.drupal.org/node/1897420
 
 API
 ---
 
 Modules can make use of browscap data by calling the browscap service ("\Drupal::service('browscap')->getBrowser();")
 anywhere they would otherwise call the PHP get_browser()
-(http://us3.php.net/manual/en/function.get-browser.php) function.
+(https://us3.php.net/manual/en/function.get-browser.php) function.
 
 Note: browser_name_regex is not returned.
 
 Credits
 -------
 
-Development of Browscap is sponsored by Acquia (http://www.acquia.com) and the
+Development of Browscap is sponsored by Acquia (https://www.acquia.com) and the
 Ontario Ministry of Northern Development and Mines (http://www.mndm.gov.on.ca).
 
 A special thanks goes out to Gary Keith (http://www.garykeith.com) who provides
