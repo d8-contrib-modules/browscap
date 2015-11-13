@@ -35,14 +35,14 @@ class BrowscapImportTest extends WebTestBase {
     // Make browscap service call to check that data was loaded.
     $user_agent = 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)';
     $properties = \Drupal::service('browscap')->getBrowser($user_agent);
-    $this->assertEqual($properties['browser'], "IE");
-    $this->assertEqual($properties['version'], "9.0");
-    $this->assertEqual($properties['platform'], "Win7");
+    $this->assertEqual($properties['browser'], "IE", "Uncached browser is correct.");
+    $this->assertEqual($properties['version'], "9.0", "Uncached browser version is correct.");
+    $this->assertEqual($properties['platform'], "Win7", "Uncached platform is correct.");
 
     // Now that the data is cached, try again
     $properties = \Drupal::service('browscap')->getBrowser($user_agent);
-    $this->assertEqual($properties['browser'], "IE");
-    $this->assertEqual($properties['version'], "9.0");
-    $this->assertEqual($properties['platform'], "Win7");
+    $this->assertEqual($properties['browser'], "IE", "Cached browser is correct.");
+    $this->assertEqual($properties['version'], "9.0", "Cached browser is correct.");
+    $this->assertEqual($properties['platform'], "Win7", "Cached browser is correct.");
   }
 }
