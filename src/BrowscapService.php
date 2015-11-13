@@ -7,8 +7,6 @@
 
 namespace Drupal\browscap;
 
-use Drupal\Component\Utility\SafeMarkup;
-
 /**
  * Class BrowscapService.
  *
@@ -30,22 +28,22 @@ class BrowscapService {
 
     // Determine the current user agent if a user agent was not specified
     if ($user_agent != NULL) {
-      $user_agent = SafeMarkup::checkPlain(trim($user_agent));
+      $user_agent = \Drupal\Component\Utility\Html::escape(trim($user_agent));
     }
     elseif ($user_agent == NULL && isset($_SERVER['HTTP_USER_AGENT'])) {
-      $user_agent = SafeMarkup::checkPlain(trim($_SERVER['HTTP_USER_AGENT']));
+      $user_agent = \Drupal\Component\Utility\Html::escape(trim($_SERVER['HTTP_USER_AGENT']));
     }
     else {
       $user_agent = 'Default Browser';
     }
 
     // Check the cache for user agent data
-    $data = $cache->get($user_agent);
+    $cache_data = $cache->get($user_agent);
 
     // Attempt to find a cached user agent
     // Otherwise store the user agent data in the cache
-    if (!empty($data) && ($data->created > REQUEST_TIME - 60 * 60 * 24)) {
-      $user_agent_properties = $data->data;
+    if (!empty($cache_data) && ($cache_data->created > REQUEST_TIME - 60 * 60 * 24)) {
+      $user_agent_properties = unserialize($cache_data->data);
     }
     else {
       // Find the user agent's properties
@@ -55,15 +53,18 @@ class BrowscapService {
       $user_agent_properties = db_query("SELECT * FROM {browscap} WHERE :useragent LIKE useragent ORDER BY LENGTH(useragent) DESC", array(':useragent' => $user_agent))
         ->fetchObject();
 
+      // Serialize the property data for caching
+      $serialized_property_data = serialize($user_agent_properties);
+
       // Store user agent data in the cache
-      $cache->set($user_agent, $user_agent_properties);
+      $cache->set($user_agent, $serialized_property_data);
     }
 
     // Create an array to hold the user agent's properties
     $properties = array();
 
     // Return an array of user agent properties
-    if (isset($user_agent_properties) && isset($user_agent_properties->data)) {
+    if (isset($user_agent_properties)) {
       // Unserialize the user agent data found in the cache or the database
       $properties = unserialize($user_agent_properties->data);
 
